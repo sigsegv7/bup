@@ -142,6 +142,50 @@ lexer_scan_ident(struct bup_state *state, int lc, struct token *res)
 }
 
 /*
+ * Scan for digits making up to a 64-bit integer
+ *
+ * @state: Compiler state
+ * @lc:    Last character
+ * @res:   Result token is written here
+ *
+ * Returns zero on success
+ */
+static int
+lexer_scan_digits(struct bup_state *state, int lc, struct token *res)
+{
+    char c, buf[21];
+    uint8_t buf_i = 0;
+
+    if (state == NULL || res == NULL) {
+        errno = -EINVAL;
+        return -1;
+    }
+
+    if (!isdigit(lc)) {
+        return -1;
+    }
+
+    buf[buf_i++] = lc;
+    for (;;) {
+        c = lexer_nom(state, true);
+        if (!isdigit(c) && c != '_') {
+            buf[buf_i] = '\0';
+            lexer_putback_chr(state, c);
+            break;
+        }
+
+        buf[buf_i++] = c;
+        if (buf_i >= sizeof(buf) - 1) {
+            return -1;
+        }
+    }
+
+    res->v = atoi(buf);
+    res->type = TT_NUMBER;
+    return 0;
+}
+
+/*
  * Checks if an identifier token is actually a keyword and
  * reassigns its type if so
  *
@@ -260,6 +304,10 @@ lexer_scan(struct bup_state *state, struct token *res)
     default:
         if (lexer_scan_ident(state, c, res) == 0) {
             lexer_check_kw(state, res);
+            return 0;
+        }
+
+        if (lexer_scan_digits(state, c, res) == 0) {
             return 0;
         }
 

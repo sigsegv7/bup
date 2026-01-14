@@ -30,6 +30,7 @@ typedef enum {
     TT_PUB,     /* 'pub' */
     TT_RETURN,  /* 'return' */
     TT_IDENT,   /* <IDENT> */
+    TT_NUMBER,  /* <NUMBER> */
 } tt_t;
 
 /*
@@ -42,6 +43,7 @@ struct token {
     union {
         char c;
         char *s;
+        ssize_t v;
     };
 };
 
