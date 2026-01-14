@@ -13,6 +13,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include "bup/lexer.h"
+#include "bup/trace.h"
 
 static inline void
 lexer_putback_chr(struct bup_state *state, char c)
@@ -314,5 +315,6 @@ lexer_scan(struct bup_state *state, struct token *res)
         break;
     }
 
+    trace_error(state, "unexpected token %c\n", c);
     return -1;
 }
