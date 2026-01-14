@@ -3,8 +3,8 @@
  * Provided under the BSD-3 clause.
  */
 
-#ifndef GUP_PTRBOX_H
-#define GUP_PTRBOX_H
+#ifndef BUP_PTRBOX_H
+#define BUP_PTRBOX_H
 
 #include <sys/queue.h>
 #include <stdint.h>
@@ -71,4 +71,4 @@ void ptrbox_destroy(struct ptrbox *ptrbox);
  */
 int ptrbox_init(struct ptrbox *res);
 
-#endif  /* !GUP_PTRBOX_H */
+#endif  /* !BUP_PTRBOX_H */
