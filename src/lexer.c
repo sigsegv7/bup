@@ -3,9 +3,12 @@
  * Provided under the BSD-3 clause.
  */
 
+#include <stdio.h>
 #include <stdint.h>
+#include <ctype.h>
 #include <errno.h>
 #include <unistd.h>
+#include <stdlib.h>
 #include <stddef.h>
 #include <stdbool.h>
 #include "bup/lexer.h"
@@ -83,6 +86,61 @@ lexer_nom(struct bup_state *state, bool skip_ws)
     return '\0';
 }
 
+/*
+ * Scan for an identifier
+ *
+ * @state: Compiler state
+ * @lc:    Last character
+ * @res:   Result is written here
+ *
+ * Returns zero on success
+ */
+static int
+lexer_scan_ident(struct bup_state *state, int lc, struct token *res)
+{
+    char *buf;
+    size_t bufcap, bufsz;
+    char c;
+
+    bufcap = 8;
+    bufsz = 0;
+
+    if (!isalpha(lc) && lc != '_') {
+        return -1;
+    }
+
+    buf = malloc(bufcap);
+    if (buf == NULL) {
+        return -1;
+    }
+
+    buf[bufsz++] = lc;
+    for (;;) {
+        c = lexer_nom(state, false);
+        if (!isalnum(c) && c != '_') {
+            buf[bufsz] = '\0';
+            lexer_putback_chr(state, c);
+            break;
+        }
+
+        buf[bufsz++] = c;
+        if (bufsz >= bufcap - 1) {
+            bufcap += 8;
+            buf = realloc(buf, bufcap);
+        }
+
+        if (buf == NULL) {
+            return -1;
+        }
+    }
+
+    res->s = ptrbox_strdup(&state->ptrbox, buf);
+    res->type = TT_IDENT;
+    free(buf);
+    return 0;
+}
+
+
 int
 lexer_scan(struct bup_state *state, struct token *res)
 {
@@ -140,6 +198,12 @@ lexer_scan(struct bup_state *state, struct token *res)
 
         res->type = TT_LTE;
         return 0;
+    default:
+        if (lexer_scan_ident(state, c, res) == 0) {
+            return 0;
+        }
+
+        break;
     }
 
     return -1;
