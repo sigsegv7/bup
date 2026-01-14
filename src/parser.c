@@ -68,11 +68,11 @@ parse_scan(struct bup_state *state, struct token *tok)
  *
  * Returns zero on success
  */
-static struct ast_node *
+static int
 parse_program(struct bup_state *state, struct token *tok)
 {
     trace_debug("got %s\n", toktab[last_token.type]);
-    return NULL;
+    return 0;
 }
 
 int
@@ -84,9 +84,10 @@ parser_parse(struct bup_state *state)
         return -1;
     }
 
-    /* TODO: We'll need to break when we get NULL */
     while ((error = parse_scan(state, &last_token)) == 0) {
-        parse_program(state, &last_token);
+        if (parse_program(state, &last_token) < 0) {
+            return -1;
+        }
     }
 
     if (error != 0) {
