@@ -1,9 +1,16 @@
+/*
+ * Copyright (C) 2026, Ian Moffett.
+ * Provided under the BSD-3 clause.
+ */
+
 #include <stdio.h>
 #include <stdint.h>
 #include "bup/lexer.h"
 #include "bup/parser.h"
 #include "bup/token.h"
 #include "bup/tokbuf.h"
+#include "bup/trace.h"
+#include "bup/ast.h"
 
 static struct token last_token;
 
@@ -50,6 +57,21 @@ parse_scan(struct bup_state *state, struct token *tok)
     return 0;
 }
 
+/*
+ * Parse the program source
+ *
+ * @state: Compiler state
+ * @tok:   Last token
+ *
+ * Returns zero on success
+ */
+static struct ast_node *
+parse_program(struct bup_state *state, struct token *tok)
+{
+    trace_debug("got %s\n", toktab[last_token.type]);
+    return NULL;
+}
+
 int
 parser_parse(struct bup_state *state)
 {
@@ -57,8 +79,9 @@ parser_parse(struct bup_state *state)
         return -1;
     }
 
+    /* TODO: We'll need to break when we get NULL */
     while (parse_scan(state, &last_token) == 0) {
-        printf("got %s\n", toktab[last_token.type]);
+        parse_program(state, &last_token);
     }
 
     return 0;
