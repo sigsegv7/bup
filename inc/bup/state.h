@@ -14,11 +14,13 @@
  * @in_fd: Input file descriptor
  * @putback: Putback buffer
  * @tbuf:    Token buffer
+ * @line_num: Current line number
  */
 struct bup_state {
     int in_fd;
     char putback;
     struct token_buf tbuf;
+    size_t line_num;
 };
 
 /*

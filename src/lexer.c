@@ -72,6 +72,8 @@ lexer_nom(struct bup_state *state, bool skip_ws)
 
     /* Begin scanning for tokens */
     while (read(state->in_fd, &c, 1) > 0) {
+        if (c == '\n')
+            ++state->line_num;
         if (lexer_is_ws(c) && skip_ws)
             continue;
 

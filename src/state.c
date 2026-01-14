@@ -28,6 +28,7 @@ bup_state_init(const char *input_path, struct bup_state *res)
         return -1;
     }
 
+    res->line_num = 1;
     return 0;
 }
 
