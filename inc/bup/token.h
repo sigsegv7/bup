@@ -26,6 +26,7 @@ typedef enum {
     TT_SEMI,    /* ';' */
     TT_PROC,    /* 'proc' */
     TT_PUB,     /* 'pub' */
+    TT_RETURN,  /* 'return' */
     TT_IDENT,   /* <IDENT> */
 } tt_t;
 
