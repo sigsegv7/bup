@@ -13,6 +13,7 @@
 #include "bup/codegen.h"
 #include "bup/ast.h"
 #include "bup/types.h"
+#include "bup/scope.h"
 
 #define tokstr1(tt)             \
     toktab[(tt)]                \
@@ -174,15 +175,66 @@ parse_type(struct bup_state *state, struct token *tok, struct datum_type *res)
 }
 
 /*
+ * Handle an lbrace token
+ *
+ * @state: Compiler state
+ * @scope: Scope block token
+ * @tok:   Last token
+ *
+ * Returns zero on success
+ */
+int
+parse_lbrace(struct bup_state *state, tt_t scope, struct token *tok)
+{
+    if (state == NULL || tok == NULL) {
+        return -1;
+    }
+
+    if (tok->type != TT_LBRACE) {
+        return -1;
+    }
+
+    if (scope_push(state, scope) < 0) {
+        return -1;
+    }
+
+    return 0;
+}
+
+/*
+ * Handle an rbrace token
+ *
+ * @state: Compiler state
+ * @tok:   Last token
+ *
+ * Returns the last scope on success, otherwise TT_NONE
+ * on failure.
+ */
+tt_t
+parse_rbrace(struct bup_state *state, struct token *tok)
+{
+    if (state == NULL || tok == NULL) {
+        return TT_NONE;
+    }
+
+    if (tok->type != TT_RBRACE) {
+        return TT_NONE;
+    }
+
+    return scope_pop(state);
+}
+
+/*
  * Parse the 'proc' keyword
  *
  * @state: Compiler state
  * @tok:   Token result
+ * @res: AST node result
  *
- * Returns the AST root on success
+ * Returns zero on success
  */
-static struct ast_node *
-parse_proc(struct bup_state *state, struct token *tok)
+static int
+parse_proc(struct bup_state *state, struct token *tok, struct ast_node **res)
 {
     struct symbol *symbol;
     struct ast_node *root;
@@ -191,13 +243,17 @@ parse_proc(struct bup_state *state, struct token *tok)
     bool is_global = false;
 
     if (state == NULL || tok == NULL) {
-        return NULL;
+        return -1;
+    }
+
+    if (res == NULL) {
+        return -1;
     }
 
     /* EXPECT 'proc' */
     if (tok->type != TT_PROC) {
         utok(state, "PROC", tokstr(tok));
-        return NULL;
+        return -1;
     }
 
     /* Is the previous token a 'pub' keyword? */
@@ -208,7 +264,7 @@ parse_proc(struct bup_state *state, struct token *tok)
 
     /* EXPECT <IDENT> */
     if (parse_expect(state, tok, TT_IDENT) < 0) {
-        return NULL;
+        return -1;
     }
 
     error = symbol_new(
@@ -220,38 +276,56 @@ parse_proc(struct bup_state *state, struct token *tok)
 
     if (error < 0) {
         trace_error(state, "failed to allocate function symbol\n");
-        return NULL;
-    }
-
-    /* Generate the AST root */
-    if (ast_alloc_node(state, AST_PROC, &root) < 0) {
-        return NULL;
+        return -1;
     }
 
     /* EXPECT '->' */
     if (parse_expect(state, tok, TT_ARROW) < 0) {
-        return NULL;
+        return -1;
     }
 
     if (parse_scan(state, tok) < 0) {
         ueof(state);
-        return NULL;
+        return -1;
     }
 
     /* EXPECT <TYPE> */
     if (parse_type(state, tok, &type) < 0) {
-        return NULL;
+        return -1;
     }
 
-    /* EXPECT <SEMICOLON> */
-    if (parse_expect(state, tok, TT_SEMI) < 0) {
-        return NULL;
+    if (parse_scan(state, tok) < 0) {
+        ueof(state);
+        return -1;
     }
 
+
+    /* Initialize the symbol */
     symbol->is_global = is_global;
     symbol->data_type = type;
-    root->symbol = symbol;
-    return root;
+
+    /* EXPECT <SEMICOLON> OR <LBRACE> */
+    switch (tok->type) {
+    case TT_SEMI:
+        break;
+    case TT_LBRACE:
+        if (parse_lbrace(state, TT_PROC, tok) < 0) {
+            return -1;
+        }
+
+        /* Generate the AST root */
+        if (ast_alloc_node(state, AST_PROC, &root) < 0) {
+            return -1;
+        }
+
+        root->symbol = symbol;
+        *res = root;
+        break;
+    default:
+        utok(state, "SEMI OR LBRACE", tokstr(tok));
+        return -1;
+    }
+    return 0;
 }
 
 /*
@@ -273,13 +347,18 @@ parse_program(struct bup_state *state, struct token *tok)
 
     switch (tok->type) {
     case TT_PROC:
-        if ((root = parse_proc(state, tok)) == NULL) {
+        if (parse_proc(state, tok, &root) < 0) {
             return -1;
         }
 
         break;
     case TT_PUB:
         /* Modifier */
+        break;
+    case TT_RBRACE:
+        if (parse_rbrace(state, tok) == TT_NONE) {
+            return -1;
+        }
         break;
     default:
         trace_error(state, "got unexpected token %s\n", tokstr(tok));

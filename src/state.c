@@ -48,6 +48,7 @@ bup_state_init(const char *input_path, struct bup_state *res)
         return -1;
     }
 
+    memset(res->scope_stack, 0, sizeof(res->scope_stack));
     res->line_num = 1;
     return 0;
 }

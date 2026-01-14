@@ -8,10 +8,12 @@
 
 #include <stdio.h>
 #include "bup/tokbuf.h"
+#include "bup/token.h"
 #include "bup/ptrbox.h"
 #include "bup/symbol.h"
 
 #define DEFAULT_ASMOUT "bupgen.asm"
+#define SCOPE_STACK_MAX 8
 
 /*
  * Represents the compiler state
@@ -23,6 +25,8 @@
  * @symtab:  Global symbol table
  * @line_num: Current line number
  * @out_fp:   Output file pointer
+ * @scope_stack: Used to keep track of scope
+ * @scope_depth: How deep in scope we are
  */
 struct bup_state {
     int in_fd;
@@ -32,6 +36,8 @@ struct bup_state {
     struct symbol_table symtab;
     size_t line_num;
     FILE *out_fp;
+    tt_t scope_stack[SCOPE_STACK_MAX];
+    uint8_t scope_depth;
 };
 
 /*
