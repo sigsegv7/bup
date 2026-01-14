@@ -10,6 +10,7 @@
 #include "bup/token.h"
 #include "bup/tokbuf.h"
 #include "bup/trace.h"
+#include "bup/codegen.h"
 #include "bup/ast.h"
 #include "bup/types.h"
 
@@ -234,6 +235,12 @@ parse_program(struct bup_state *state, struct token *tok)
         trace_error(state, "got unexpected token %s\n", tokstr(tok));
         return -1;
     }
+
+    if (root != NULL) {
+        if (cg_compile_node(state, root) < 0)
+            return -1;
+    }
+
     return 0;
 }
 
