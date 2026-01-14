@@ -26,10 +26,12 @@ typedef enum {
  *
  * @type: Node type
  * @symbol: Program symbol associated with node
+ * @epilogue: Returns true if node is epilogue
  */
 struct ast_node {
     ast_type_t type;
     struct symbol *symbol;
+    uint8_t epilogue : 1;
 };
 
 /*

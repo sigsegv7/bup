@@ -213,6 +213,9 @@ parse_lbrace(struct bup_state *state, tt_t scope, struct token *tok)
 tt_t
 parse_rbrace(struct bup_state *state, struct token *tok)
 {
+    struct ast_node *root;
+    tt_t scope;
+
     if (state == NULL || tok == NULL) {
         return TT_NONE;
     }
@@ -221,7 +224,25 @@ parse_rbrace(struct bup_state *state, struct token *tok)
         return TT_NONE;
     }
 
-    return scope_pop(state);
+    /* Handle scope epilogues */
+    scope = scope_pop(state);
+    switch (scope) {
+    case TT_PROC:
+        if (ast_alloc_node(state, AST_PROC, &root) < 0) {
+            trace_error(state, "failed to allocate AST_PROC\n");
+            return -1;
+        }
+
+        root->epilogue = 1;
+        if (cg_compile_node(state, root) < 0) {
+            return -1;
+        }
+        break;
+    default:
+        break;
+    }
+
+    return scope;
 }
 
 /*

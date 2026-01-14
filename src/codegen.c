@@ -21,19 +21,25 @@ static int
 cg_emit_proc(struct bup_state *state, struct ast_node *root)
 {
     struct symbol *symbol;
+    int retval = 0;
 
     if (state == NULL || root == NULL) {
         errno = -EINVAL;
         return -1;
     }
 
-    if ((symbol = root->symbol) == NULL) {
+    if ((symbol = root->symbol) == NULL && !root->epilogue) {
         trace_error(state, "proc node has no symbol\n");
         return -1;
     }
 
-    trace_debug("detected procedure %s\n", symbol->name);
-    return mu_cg_label(state, symbol->name, symbol->is_global);
+    if (root->epilogue) {
+        retval = mu_cg_ret(state);
+    } else {
+        trace_debug("detected procedure %s\n", symbol->name);
+        retval = mu_cg_label(state, symbol->name, symbol->is_global);
+    }
+    return retval;
 }
 
 int
