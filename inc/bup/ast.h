@@ -7,6 +7,7 @@
 #define BUP_AST_H
 
 #include "bup/state.h"
+#include "bup/symbol.h"
 
 /*
  * Represents valid AST types
@@ -24,9 +25,11 @@ typedef enum {
  * node.
  *
  * @type: Node type
+ * @symbol: Program symbol associated with node
  */
 struct ast_node {
     ast_type_t type;
+    struct symbol *symbol;
 };
 
 /*
