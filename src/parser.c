@@ -75,13 +75,19 @@ parse_program(struct bup_state *state, struct token *tok)
 int
 parser_parse(struct bup_state *state)
 {
+    int error;
+
     if (state == NULL) {
         return -1;
     }
 
     /* TODO: We'll need to break when we get NULL */
-    while (parse_scan(state, &last_token) == 0) {
+    while ((error = parse_scan(state, &last_token)) == 0) {
         parse_program(state, &last_token);
+    }
+
+    if (error != 0) {
+        return -1;
     }
 
     return 0;
