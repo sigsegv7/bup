@@ -24,13 +24,19 @@ bup_state_init(const char *input_path, struct bup_state *res)
         return -1;
     }
 
+    if (symbol_table_init(&res->symtab) < 0) {
+        close(res->in_fd);
+    }
+
     if (ptrbox_init(&res->ptrbox) < 0) {
         close(res->in_fd);
+        symbol_table_destroy(&res->symtab);
         return -1;
     }
 
     if (token_buf_init(&res->tbuf) < 0) {
         close(res->in_fd);
+        symbol_table_destroy(&res->symtab);
         return -1;
     }
 
@@ -47,4 +53,5 @@ bup_state_destroy(struct bup_state *state)
 
     close(state->in_fd);
     ptrbox_destroy(&state->ptrbox);
+    symbol_table_destroy(&state->symtab);
 }

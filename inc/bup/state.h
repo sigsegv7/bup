@@ -8,6 +8,7 @@
 
 #include "bup/tokbuf.h"
 #include "bup/ptrbox.h"
+#include "bup/symbol.h"
 
 /*
  * Represents the compiler state
@@ -16,6 +17,7 @@
  * @putback: Putback buffer
  * @tbuf:    Token buffer
  * @ptrbox:  Global pointer box
+ * @symtab:  Global symbol table
  * @line_num: Current line number
  */
 struct bup_state {
@@ -23,6 +25,7 @@ struct bup_state {
     char putback;
     struct token_buf tbuf;
     struct ptrbox ptrbox;
+    struct symbol_table symtab;
     size_t line_num;
 };
 
