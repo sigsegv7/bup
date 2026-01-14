@@ -8,6 +8,39 @@
 
 #include <stdbool.h>
 #include "bup/state.h"
+#include "bup/types.h"
+
+/*
+ * Represents valid machine size types
+ */
+typedef enum {
+    MSIZE_BAD,
+    MSIZE_BYTE,
+    MSIZE_WORD,
+    MSIZE_DWORD,
+    MSIZE_QWORD,
+    MSIZE_MAX
+} msize_t;
+
+/*
+ * Convert a program type into a machine size
+ * type
+ *
+ * @type: Program type to convert
+ */
+static inline msize_t
+type_to_msize(bup_type_t type)
+{
+    switch (type) {
+    case BUP_TYPE_U8:   return MSIZE_BYTE;
+    case BUP_TYPE_U16:  return MSIZE_WORD;
+    case BUP_TYPE_U32:  return MSIZE_DWORD;
+    case BUP_TYPE_U64:  return MSIZE_QWORD;
+    default:            return MSIZE_BAD;
+    }
+
+    return MSIZE_BAD;
+}
 
 /*
  * Generate a label of a specific name
@@ -28,5 +61,17 @@ int mu_cg_label(struct bup_state *state, const char *name, bool is_global);
  * Returns zero on success
  */
 int mu_cg_ret(struct bup_state *state);
+
+/*
+ * Generate a return with a return value register
+ * filled
+ *
+ * @state: Compiler state
+ * @size:  Machine size
+ * @imm:     Value to return
+ *
+ * Returns zero on success
+ */
+int mu_cg_retimm(struct bup_state *state, msize_t size, ssize_t imm);
 
 #endif  /* !BUP_MU_H */

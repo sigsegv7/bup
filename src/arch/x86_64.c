@@ -8,6 +8,14 @@
 #include "bup/state.h"
 #include "bup/mu.h"
 
+/* Return size lookup table */
+static const char *rettab[] = {
+    [MSIZE_BYTE] = "al",
+    [MSIZE_WORD] = "ax",
+    [MSIZE_DWORD] = "eax",
+    [MSIZE_QWORD] = "rax"
+};
+
 int
 mu_cg_label(struct bup_state *state, const char *name, bool is_global)
 {
@@ -44,6 +52,24 @@ mu_cg_ret(struct bup_state *state)
     fprintf(
         state->out_fp,
         "\tret\n"
+    );
+
+    return 0;
+}
+
+int
+mu_cg_retimm(struct bup_state *state, msize_t size, ssize_t imm)
+{
+    if (state == NULL || size >= MSIZE_MAX) {
+        errno = -EINVAL;
+        return -1;
+    }
+
+    fprintf(
+        state->out_fp,
+        "\tmov %s, %zd\n",
+        rettab[size],
+        imm
     );
 
     return 0;
