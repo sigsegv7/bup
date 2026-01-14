@@ -8,6 +8,14 @@
 #include "bup/codegen.h"
 #include "bup/trace.h"
 
+/*
+ * Emit a procedure to assembly
+ *
+ * @state: Compiler state
+ * @root:  Root node of procedure
+ *
+ * Returns zero on success
+ */
 static int
 cg_emit_proc(struct bup_state *state, struct ast_node *root)
 {
