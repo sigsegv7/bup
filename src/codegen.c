@@ -7,6 +7,7 @@
 #include <errno.h>
 #include "bup/codegen.h"
 #include "bup/trace.h"
+#include "bup/mu.h"
 
 /*
  * Emit a procedure to assembly
@@ -32,8 +33,7 @@ cg_emit_proc(struct bup_state *state, struct ast_node *root)
     }
 
     trace_debug("detected procedure %s\n", symbol->name);
-    trace_error(state, "procedures are a TODO\n");
-    return -1;
+    return mu_cg_label(state, symbol->name, false);
 }
 
 int

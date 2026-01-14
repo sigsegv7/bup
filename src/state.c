@@ -34,7 +34,15 @@ bup_state_init(const char *input_path, struct bup_state *res)
         return -1;
     }
 
+    res->out_fp = fopen(DEFAULT_ASMOUT, "w");
+    if (res->out_fp == NULL) {
+        close(res->in_fd);
+        symbol_table_destroy(&res->symtab);
+        return -1;
+    }
+
     if (token_buf_init(&res->tbuf) < 0) {
+        fclose(res->out_fp);
         close(res->in_fd);
         symbol_table_destroy(&res->symtab);
         return -1;
@@ -52,6 +60,7 @@ bup_state_destroy(struct bup_state *state)
     }
 
     close(state->in_fd);
+    fclose(state->out_fp);
     ptrbox_destroy(&state->ptrbox);
     symbol_table_destroy(&state->symtab);
 }

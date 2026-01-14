@@ -1,6 +1,7 @@
 include mk/defaults.mk
 
 CFILES = $(shell find src/ -name "*.c")
+CFILES += src/arch/$(ARCH).c
 DFILES = $(CFILES:.c=.d)
 OFILES = $(CFILES:.c=.o)
 

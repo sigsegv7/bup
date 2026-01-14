@@ -6,9 +6,12 @@
 #ifndef BUP_STATE_H
 #define BUP_STATE_H 1
 
+#include <stdio.h>
 #include "bup/tokbuf.h"
 #include "bup/ptrbox.h"
 #include "bup/symbol.h"
+
+#define DEFAULT_ASMOUT "bupgen.asm"
 
 /*
  * Represents the compiler state
@@ -19,6 +22,7 @@
  * @ptrbox:  Global pointer box
  * @symtab:  Global symbol table
  * @line_num: Current line number
+ * @out_fp:   Output file pointer
  */
 struct bup_state {
     int in_fd;
@@ -27,6 +31,7 @@ struct bup_state {
     struct ptrbox ptrbox;
     struct symbol_table symtab;
     size_t line_num;
+    FILE *out_fp;
 };
 
 /*

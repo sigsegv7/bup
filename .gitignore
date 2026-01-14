@@ -1,3 +1,4 @@
 /bup
 *.o
 *.d
+bupgen.asm
