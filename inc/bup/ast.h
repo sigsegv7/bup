@@ -27,7 +27,6 @@ struct ast_node {
     ast_type_t type;
 };
 
-
 /*
  * Allocate a new AST node
  *
