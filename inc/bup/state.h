@@ -6,15 +6,19 @@
 #ifndef BUP_STATE_H
 #define BUP_STATE_H 1
 
+#include "bup/tokbuf.h"
+
 /*
  * Represents the compiler state
  *
  * @in_fd: Input file descriptor
  * @putback: Putback buffer
+ * @tbuf:    Token buffer
  */
 struct bup_state {
     int in_fd;
     char putback;
+    struct token_buf tbuf;
 };
 
 /*

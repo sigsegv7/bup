@@ -24,6 +24,10 @@ bup_state_init(const char *input_path, struct bup_state *res)
         return -1;
     }
 
+    if (token_buf_init(&res->tbuf) < 0) {
+        return -1;
+    }
+
     return 0;
 }
 
