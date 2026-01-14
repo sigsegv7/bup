@@ -7,6 +7,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include "bup/state.h"
+#include "bup/parser.h"
 
 #define BUP_VERSION "0.0.1"
 
@@ -39,6 +40,10 @@ compile(const char *path)
 
     if (bup_state_init(path, &state) < 0) {
         printf("fatal: failed to initialize state\n");
+        return -1;
+    }
+
+    if (parser_parse(&state) < 0) {
         return -1;
     }
 
