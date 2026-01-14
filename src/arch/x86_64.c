@@ -32,3 +32,19 @@ mu_cg_label(struct bup_state *state, const char *name, bool is_global)
 
     return 0;
 }
+
+int
+mu_cg_ret(struct bup_state *state)
+{
+    if (state == NULL) {
+        errno = -EINVAL;
+        return -1;
+    }
+
+    fprintf(
+        state->out_fp,
+        "\tret\n"
+    );
+
+    return 0;
+}

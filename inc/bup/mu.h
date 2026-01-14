@@ -20,4 +20,13 @@
  */
 int mu_cg_label(struct bup_state *state, const char *name, bool is_global);
 
+/*
+ * Generate a 'ret'
+ *
+ * @state: Compiler state
+ *
+ * Returns zero on success
+ */
+int mu_cg_ret(struct bup_state *state);
+
 #endif  /* !BUP_MU_H */
