@@ -6,6 +6,7 @@
 #ifndef BUP_TOKEN_H
 #define BUP_TOKEN_H 1
 
+#include <sys/types.h>
 #include <stdint.h>
 
 /*
