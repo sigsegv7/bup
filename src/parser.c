@@ -14,7 +14,13 @@ static const char *toktab[] = {
     [TT_NONE]       = "NONE",
     [TT_PLUS]       = "PLUS",
     [TT_MINUS]      = "MINUS",
-    [TT_ARROW]      = "ARROW"
+    [TT_SLASH]      = "SLASH",
+    [TT_STAR]       = "STAR",
+    [TT_GT]         = "GREATER-THAN",
+    [TT_LT]         = "LESS-THAN",
+    [TT_GTE]        = "GREATER-THAN-OR-EQUAL",
+    [TT_LTE]        = "LESS-THAN-OR-EQUAL",
+    [TT_ARROW]      = "ARROW",
 };
 
 int

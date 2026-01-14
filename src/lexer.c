@@ -110,6 +110,34 @@ lexer_scan(struct bup_state *state, struct token *res)
 
         res->type = TT_ARROW;
         return 0;
+    case '/':
+        res->type = TT_SLASH;
+        res->c = c;
+        return 0;
+    case '*':
+        res->type = TT_STAR;
+        res->c = c;
+        return 0;
+    case '>':
+        res->type = TT_GT;
+        res->c = c;
+        if ((c = lexer_nom(state, true)) != '=') {
+            lexer_putback_chr(state, c);
+            return 0;
+        }
+
+        res->type = TT_GTE;
+        return 0;
+    case '<':
+        res->type = TT_LT;
+        res->c = c;
+        if ((c = lexer_nom(state, true)) != '=') {
+            lexer_putback_chr(state, c);
+            return 0;
+        }
+
+        res->type = TT_LTE;
+        return 0;
     }
 
     return -1;

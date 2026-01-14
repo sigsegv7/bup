@@ -16,6 +16,12 @@ typedef enum {
     TT_NONE,    /* <TT_NONE>  */
     TT_PLUS,    /* '+' */
     TT_MINUS,   /* '-' */
+    TT_SLASH,   /* '/' */
+    TT_STAR,    /* '*' */
+    TT_GT,      /* '>' */
+    TT_LT,      /* '<' */
+    TT_GTE,     /* '>= */
+    TT_LTE,     /* '<=' */
     TT_ARROW,   /* '->' */
 } tt_t;
 
