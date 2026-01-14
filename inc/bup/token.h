@@ -30,8 +30,13 @@ typedef enum {
     TT_PROC,    /* 'proc' */
     TT_PUB,     /* 'pub' */
     TT_RETURN,  /* 'return' */
+    TT_U8,      /* 'u8' */
+    TT_U16,     /* 'u16' */
+    TT_U32,     /* 'u32' */
+    TT_U64,     /* 'u64' */
     TT_IDENT,   /* <IDENT> */
     TT_NUMBER,  /* <NUMBER> */
+
 } tt_t;
 
 /*
