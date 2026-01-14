@@ -183,7 +183,7 @@ parse_type(struct bup_state *state, struct token *tok, struct datum_type *res)
  *
  * Returns zero on success
  */
-int
+static int
 parse_lbrace(struct bup_state *state, tt_t scope, struct token *tok)
 {
     if (state == NULL || tok == NULL) {
@@ -210,7 +210,7 @@ parse_lbrace(struct bup_state *state, tt_t scope, struct token *tok)
  * Returns the last scope on success, otherwise TT_NONE
  * on failure.
  */
-tt_t
+static tt_t
 parse_rbrace(struct bup_state *state, struct token *tok)
 {
     struct ast_node *root;
