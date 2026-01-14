@@ -161,8 +161,10 @@ parse_type(struct bup_state *state, struct token *tok, struct datum_type *res)
 static struct ast_node *
 parse_proc(struct bup_state *state, struct token *tok)
 {
+    struct symbol *symbol;
     struct ast_node *root;
     struct datum_type type;
+    int error;
 
     if (state == NULL || tok == NULL) {
         return NULL;
@@ -176,6 +178,18 @@ parse_proc(struct bup_state *state, struct token *tok)
 
     /* EXPECT <IDENT> */
     if (parse_expect(state, tok, TT_IDENT) < 0) {
+        return NULL;
+    }
+
+    error = symbol_new(
+        &state->symtab,
+        tok->s,
+        BUP_TYPE_VOID,
+        &symbol
+    );
+
+    if (error < 0) {
+        trace_error(state, "failed to allocate function symbol\n");
         return NULL;
     }
 
@@ -204,6 +218,8 @@ parse_proc(struct bup_state *state, struct token *tok)
         return NULL;
     }
 
+    symbol->data_type = type;
+    root->symbol = symbol;
     return root;
 }
 

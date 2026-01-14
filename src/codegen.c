@@ -11,11 +11,19 @@
 static int
 cg_emit_proc(struct bup_state *state, struct ast_node *root)
 {
+    struct symbol *symbol;
+
     if (state == NULL || root == NULL) {
         errno = -EINVAL;
         return -1;
     }
 
+    if ((symbol = root->symbol) == NULL) {
+        trace_error(state, "proc node has no symbol\n");
+        return -1;
+    }
+
+    trace_debug("detected procedure %s\n", symbol->name);
     trace_error(state, "procedures are a TODO\n");
     return -1;
 }
