@@ -24,6 +24,7 @@ typedef enum {
     TT_LTE,     /* '<=' */
     TT_ARROW,   /* '->' */
     TT_PROC,    /* 'proc' */
+    TT_PUB,     /* 'pub' */
     TT_IDENT,   /* <IDENT> */
 } tt_t;
 

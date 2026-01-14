@@ -170,6 +170,11 @@ lexer_check_kw(struct bup_state *state, struct token *tok)
             return 0;
         }
 
+        if (strcmp(tok->s, "pub") == 0) {
+            tok->type = TT_PUB;
+            return 0;
+        }
+
         break;
     }
 
