@@ -7,6 +7,7 @@
 #define BUP_STATE_H 1
 
 #include "bup/tokbuf.h"
+#include "bup/ptrbox.h"
 
 /*
  * Represents the compiler state
@@ -14,12 +15,14 @@
  * @in_fd: Input file descriptor
  * @putback: Putback buffer
  * @tbuf:    Token buffer
+ * @ptrbox:  Global pointer box
  * @line_num: Current line number
  */
 struct bup_state {
     int in_fd;
     char putback;
     struct token_buf tbuf;
+    struct ptrbox ptrbox;
     size_t line_num;
 };
 

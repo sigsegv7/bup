@@ -24,6 +24,11 @@ bup_state_init(const char *input_path, struct bup_state *res)
         return -1;
     }
 
+    if (ptrbox_init(&res->ptrbox) < 0) {
+        close(res->in_fd);
+        return -1;
+    }
+
     if (token_buf_init(&res->tbuf) < 0) {
         close(res->in_fd);
         return -1;
@@ -41,4 +46,5 @@ bup_state_destroy(struct bup_state *state)
     }
 
     close(state->in_fd);
+    ptrbox_destroy(&state->ptrbox);
 }
