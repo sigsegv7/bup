@@ -1,0 +1,26 @@
+/*
+ * Copyright (C) 2026, Ian Moffett.
+ * Provided under the BSD-3 clause.
+ */
+
+#ifndef BUP_TRACE_H
+#define BUP_TRACE_H 1
+
+#include <stdio.h>
+#include "bup/state.h"
+
+#define trace_error(gup_state, fmt, ...)    \
+    printf("[\033[90;91merror\033[0m]: " fmt, ##__VA_ARGS__); \
+    printf("[near line %zu]\n", (gup_state)->line_num);
+#define trace_warn(fmt, ...)   \
+    printf("[\033[90;95mwarn\033[0m]: " fmt, ##__VA_ARGS__)
+
+#define DEBUG 1
+#if DEBUG
+#define trace_debug(fmt, ...)   \
+    printf("[\033[90;94mdebug\033[0m]: " fmt, ##__VA_ARGS__)
+#else
+#define trace_debug(...) (void)0
+#endif  /* DEBUG */
+
+#endif  /* !BUP_TRACE_H */
