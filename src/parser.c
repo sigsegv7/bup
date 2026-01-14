@@ -67,6 +67,29 @@ static const char *toktab[] = {
 };
 
 /*
+ * Perform a lookbehind
+ *
+ * @state: Compiler state
+ * @count: Number of steps to take back
+ * @res:  Resulting token written here
+ *
+ * Returns zero on success
+ */
+static inline int
+parse_backstep(struct bup_state *state, size_t count, struct token *res)
+{
+    int error;
+
+    error = token_buf_lookbehind(&state->tbuf, count, res);
+    if (error < 0)
+        return error;
+    if (res->type == TT_NONE)
+        return -1;
+
+    return 0;
+}
+
+/*
  * Scan for a single token
  *
  * @state: Compiler state
@@ -165,6 +188,7 @@ parse_proc(struct bup_state *state, struct token *tok)
     struct ast_node *root;
     struct datum_type type;
     int error;
+    bool is_global = false;
 
     if (state == NULL || tok == NULL) {
         return NULL;
@@ -174,6 +198,12 @@ parse_proc(struct bup_state *state, struct token *tok)
     if (tok->type != TT_PROC) {
         utok(state, "PROC", tokstr(tok));
         return NULL;
+    }
+
+    /* Is the previous token a 'pub' keyword? */
+    if (parse_backstep(state, 1, tok) == 0) {
+        if (tok->type == TT_PUB)
+            is_global = true;
     }
 
     /* EXPECT <IDENT> */
@@ -218,6 +248,7 @@ parse_proc(struct bup_state *state, struct token *tok)
         return NULL;
     }
 
+    symbol->is_global = is_global;
     symbol->data_type = type;
     root->symbol = symbol;
     return root;
@@ -234,7 +265,7 @@ parse_proc(struct bup_state *state, struct token *tok)
 static int
 parse_program(struct bup_state *state, struct token *tok)
 {
-    struct ast_node *root;
+    struct ast_node *root = NULL;
 
     if (state == NULL || tok == NULL) {
         return -1;
@@ -246,6 +277,9 @@ parse_program(struct bup_state *state, struct token *tok)
             return -1;
         }
 
+        break;
+    case TT_PUB:
+        /* Modifier */
         break;
     default:
         trace_error(state, "got unexpected token %s\n", tokstr(tok));

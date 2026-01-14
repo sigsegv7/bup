@@ -33,7 +33,7 @@ cg_emit_proc(struct bup_state *state, struct ast_node *root)
     }
 
     trace_debug("detected procedure %s\n", symbol->name);
-    return mu_cg_label(state, symbol->name, false);
+    return mu_cg_label(state, symbol->name, symbol->is_global);
 }
 
 int

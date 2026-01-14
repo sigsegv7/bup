@@ -32,6 +32,7 @@ typedef enum {
  * @id: Symbol ID
  * @type: Symbol type
  * @data_type: Data type
+ * @is_global: If set, symbol is global
  * @link: Queue link
  */
 struct symbol {
@@ -39,6 +40,7 @@ struct symbol {
     sym_id_t id;
     sym_type_t type;
     struct datum_type data_type;
+    uint8_t is_global : 1;
     TAILQ_ENTRY(symbol) link;
 };
 
