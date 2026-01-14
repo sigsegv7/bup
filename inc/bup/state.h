@@ -10,9 +10,11 @@
  * Represents the compiler state
  *
  * @in_fd: Input file descriptor
+ * @putback: Putback buffer
  */
 struct bup_state {
     int in_fd;
+    char putback;
 };
 
 /*
