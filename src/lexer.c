@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <stddef.h>
 #include <stdbool.h>
+#include <string.h>
 #include "bup/lexer.h"
 
 static inline void
@@ -140,6 +141,40 @@ lexer_scan_ident(struct bup_state *state, int lc, struct token *res)
     return 0;
 }
 
+/*
+ * Checks if an identifier token is actually a keyword and
+ * reassigns its type if so
+ *
+ * @state: Compiler state
+ * @tok:   Token to check
+ *
+ * Returns zero on success
+ */
+static int
+lexer_check_kw(struct bup_state *state, struct token *tok)
+{
+    if (state == NULL || tok == NULL) {
+        errno = -EINVAL;
+        return -1;
+    }
+
+    if (tok->type != TT_IDENT) {
+        errno = -EINVAL;
+        return -1;
+    }
+
+    switch (*tok->s) {
+    case 'p':
+        if (strcmp(tok->s, "proc") == 0) {
+            tok->type = TT_PROC;
+            return 0;
+        }
+
+        break;
+    }
+
+    return -1;
+}
 
 int
 lexer_scan(struct bup_state *state, struct token *res)
@@ -200,6 +235,7 @@ lexer_scan(struct bup_state *state, struct token *res)
         return 0;
     default:
         if (lexer_scan_ident(state, c, res) == 0) {
+            lexer_check_kw(state, res);
             return 0;
         }
 
