@@ -103,6 +103,12 @@ lexer_scan(struct bup_state *state, struct token *res)
     case '-':
         res->type = TT_MINUS;
         res->c = c;
+        if ((c = lexer_nom(state, true)) != '>') {
+            lexer_putback_chr(state, c);
+            return 0;
+        }
+
+        res->type = TT_ARROW;
         return 0;
     }
 
