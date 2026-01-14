@@ -12,9 +12,11 @@
  * Represents valid AST types
  *
  * @AST_NONE: No type associated
+ * @AST_PROC: Procedure
  */
 typedef enum {
-    AST_NONE
+    AST_NONE,
+    AST_PROC,
 } ast_type_t;
 
 /*

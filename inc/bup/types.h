@@ -20,6 +20,15 @@ typedef enum {
     BUP_TYPE_U64
 } bup_type_t;
 
+/*
+ * Represents a specific data type
+ *
+ * @type: Program data type
+ */
+struct datum_type {
+    bup_type_t type;
+};
+
 static inline bup_type_t
 token_to_type(tt_t tt)
 {
