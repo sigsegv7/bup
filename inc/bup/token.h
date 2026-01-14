@@ -23,6 +23,7 @@ typedef enum {
     TT_GTE,     /* '>= */
     TT_LTE,     /* '<=' */
     TT_ARROW,   /* '->' */
+    TT_SEMI,    /* ';' */
     TT_PROC,    /* 'proc' */
     TT_PUB,     /* 'pub' */
     TT_IDENT,   /* <IDENT> */
