@@ -430,7 +430,6 @@ parse_proc(struct bup_state *state, struct token *tok, struct ast_node **res)
         return -1;
     }
 
-
     /* Initialize the symbol */
     symbol->is_global = is_global;
     symbol->data_type = type;
