@@ -36,6 +36,7 @@ typedef enum {
     TT_U32,     /* 'u32' */
     TT_U64,     /* 'u64' */
     TT_VOID,    /* 'void' */
+    TT_LOOP,    /* 'loop' */
     TT_IDENT,   /* <IDENT> */
     TT_NUMBER,  /* <NUMBER> */
     TT_COMMENT, /* <COMMENT: ignored> */
