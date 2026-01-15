@@ -238,6 +238,11 @@ parse_rbrace(struct bup_state *state, struct token *tok)
     scope = scope_pop(state);
     switch (scope) {
     case TT_PROC:
+        if (state->unreachable) {
+            state->unreachable = 0;
+            break;
+        }
+
         if (ast_alloc_node(state, AST_PROC, &root) < 0) {
             trace_error(state, "failed to allocate AST_PROC\n");
             return -1;
@@ -329,6 +334,7 @@ parse_return(struct bup_state *state, struct token *tok, struct ast_node **res)
         return -1;
     }
 
+    state->unreachable = 1;
     switch (tok->type) {
     case TT_SEMI:
         *res = root;
