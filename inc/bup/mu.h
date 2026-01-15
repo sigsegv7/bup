@@ -121,4 +121,19 @@ int mu_cg_jmp(struct bup_state *state, char *label);
  */
 int mu_cg_icmpnz(struct bup_state *state, const char *label, ssize_t imm);
 
+/*
+ * Load an imm into a variable
+ *
+ * @state: Compiler state
+ * @size:  Load size
+ * @label: Label to load into
+ * @imm:   Value to load
+ *
+ * Returs zero on success
+ */
+int mu_cg_istorevar(
+    struct bup_state *state, msize_t size,
+    const char *label, ssize_t imm
+);
+
 #endif  /* !BUP_MU_H */

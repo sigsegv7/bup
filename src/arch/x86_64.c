@@ -36,6 +36,14 @@ static const char *dsztab[] = {
     [MSIZE_QWORD] = "dq"
 };
 
+/* Size table */
+static const char *sztab[] = {
+    [MSIZE_BYTE] = "byte",
+    [MSIZE_WORD] = "word",
+    [MSIZE_DWORD] = "dword",
+    [MSIZE_QWORD] = "qword"
+};
+
 /* Program section lookup table */
 static const char *sectab[] = {
     [SECTION_NONE] =    "none",
@@ -246,6 +254,31 @@ mu_cg_globvar(struct bup_state *state, const char *name, msize_t size,
         "%s: %s %zd\n",
         name,
         dsztab[size],
+        imm
+    );
+
+    return 0;
+}
+
+int
+mu_cg_istorevar(struct bup_state *state, msize_t size,
+    const char *label, ssize_t imm)
+{
+    if (state == NULL || label == NULL) {
+        errno = -EINVAL;
+        return -1;
+    }
+
+    if (size >= MSIZE_MAX) {
+        errno = -EINVAL;
+        return -1;
+    }
+
+    fprintf(
+        state->out_fp,
+        "\tmov %s [rel %s], %zd\n",
+        sztab[size],
+        label,
         imm
     );
 
