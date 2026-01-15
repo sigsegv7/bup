@@ -16,12 +16,14 @@
  * @AST_PROC:   Procedure
  * @AST_NUMBER: Is a number
  * @AST_RETURN: Return statement
+ * @AST_ASM:    Assembly block
  */
 typedef enum {
     AST_NONE,
     AST_PROC,
     AST_NUMBER,
-    AST_RETURN
+    AST_RETURN,
+    AST_ASM
 } ast_type_t;
 
 /*
@@ -42,6 +44,7 @@ struct ast_node {
     uint8_t epilogue : 1;
     union {
         ssize_t v;
+        char *s;
     };
 };
 

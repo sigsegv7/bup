@@ -5,5 +5,7 @@
 
 pub proc main -> u32
 {
+    @ mov rax, 1
+    @ nop
     return 0;
 }

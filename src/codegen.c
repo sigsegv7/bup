@@ -75,6 +75,30 @@ cg_emit_return(struct bup_state *state, struct ast_node *root)
     return mu_cg_retimm(state, MSIZE_DWORD, node->v);
 }
 
+/*
+ * Emit an inline assembly line
+ *
+ * @state: Compiler state
+ * @root:  Root node of inline assembly
+ *
+ * Returns zero on success
+ */
+static int
+cg_emit_asm(struct bup_state *state, struct ast_node *root)
+{
+    if (state == NULL || root == NULL) {
+        errno = -EINVAL;
+        return -1;
+    }
+
+    if (root->type != AST_ASM) {
+        errno = -EINVAL;
+        return -1;
+    }
+
+    return mu_cg_inject(state, root->s);
+}
+
 int
 cg_compile_node(struct bup_state *state, struct ast_node *root)
 {
@@ -92,6 +116,12 @@ cg_compile_node(struct bup_state *state, struct ast_node *root)
         return 0;
     case AST_RETURN:
         if (cg_emit_return(state, root) < 0) {
+            return -1;
+        }
+
+        return 0;
+    case AST_ASM:
+        if (cg_emit_asm(state, root) < 0) {
             return -1;
         }
 

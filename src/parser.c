@@ -452,6 +452,42 @@ parse_proc(struct bup_state *state, struct token *tok, struct ast_node **res)
 }
 
 /*
+ * Parse as 'asm' block
+ *
+ * @state: Compiler state
+ * @tok:   Token result
+ * @res: AST node result
+ *
+ * Returns zero on success
+ */
+static int
+parse_asm(struct bup_state *state, struct token *tok, struct ast_node **res)
+{
+    struct ast_node *root;
+
+    if (state == NULL || tok == NULL) {
+        return -1;
+    }
+
+    if (res == NULL) {
+        return -1;
+    }
+
+    if (tok->type != TT_ASM) {
+        return -1;
+    }
+
+    if (ast_alloc_node(state, AST_ASM, &root) < 0) {
+        trace_error(state, "failed to allocate AST_ASM\n");
+        return -1;
+    }
+
+    root->s = tok->s;
+    *res = root;
+    return 0;
+}
+
+/*
  * Parse the program source
  *
  * @state: Compiler state
@@ -477,6 +513,12 @@ parse_program(struct bup_state *state, struct token *tok)
         break;
     case TT_RETURN:
         if (parse_return(state, tok, &root) < 0) {
+            return -1;
+        }
+
+        break;
+    case TT_ASM:
+        if (parse_asm(state, tok, &root) < 0) {
             return -1;
         }
 
