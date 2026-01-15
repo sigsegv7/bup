@@ -22,6 +22,7 @@ typedef size_t sym_id_t;
  */
 typedef enum {
     SYMBOL_NONE,
+    SYMBOL_VAR,
     SYMBOL_FUNC,
 } sym_type_t;
 

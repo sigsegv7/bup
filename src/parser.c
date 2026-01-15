@@ -661,6 +661,7 @@ parse_var(struct bup_state *state, struct token *tok, struct ast_node **res)
         return -1;
     }
 
+    symbol->type = SYMBOL_VAR;
     symbol->is_global = is_global;
     root->symbol = symbol;
 
