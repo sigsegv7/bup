@@ -253,6 +253,99 @@ parse_rbrace(struct bup_state *state, struct token *tok)
 }
 
 /*
+ * Parse a value
+ *
+ * @state: Compiler state
+ * @tok:   Token result
+ * @res:   AST node result
+ */
+static int
+parse_value(struct bup_state *state, struct token *tok, struct ast_node **res)
+{
+    struct ast_node *root;
+
+    if (state == NULL || tok == NULL) {
+        return -1;
+    }
+
+    if (res == NULL) {
+        return -1;
+    }
+
+    switch (tok->type) {
+    case TT_NUMBER:
+        if (ast_alloc_node(state, AST_NUMBER, &root) < 0) {
+            trace_error(state, "failed to allocate AST_NUMBER\n");
+            return -1;
+        }
+
+        root->v = tok->v;
+        *res = root;
+        return 0;
+    default:
+        utok1(state, tok);
+        break;
+    }
+
+    return -1;
+}
+
+/*
+ * Parse the 'return' keyword
+ *
+ * @state: Compiler state
+ * @tok:   Token result
+ * @res:   AST node result
+ */
+static int
+parse_return(struct bup_state *state, struct token *tok, struct ast_node **res)
+{
+    struct ast_node *value_node, *root;
+
+    if (state == NULL || tok == NULL) {
+        return -1;
+    }
+
+    if (res == NULL) {
+        return -1;
+    }
+
+    if (tok->type != TT_RETURN) {
+        return -1;
+    }
+
+    if (parse_scan(state, tok) < 0) {
+        ueof(state);
+        return -1;
+    }
+
+    if (ast_alloc_node(state, AST_RETURN, &root) < 0) {
+        trace_error(state, "failed to allocate AST_RETURN\n");
+        return -1;
+    }
+
+    switch (tok->type) {
+    case TT_SEMI:
+        *res = root;
+        return 0;
+    default:
+        if (parse_value(state, tok, &value_node) < 0) {
+            return -1;
+        }
+
+        if (parse_expect(state, tok, TT_SEMI) < 0) {
+            return -1;
+        }
+
+        root->right = value_node;
+        *res = root;
+        break;
+    }
+
+    return 0;
+}
+
+/*
  * Parse the 'proc' keyword
  *
  * @state: Compiler state
@@ -376,6 +469,12 @@ parse_program(struct bup_state *state, struct token *tok)
     switch (tok->type) {
     case TT_PROC:
         if (parse_proc(state, tok, &root) < 0) {
+            return -1;
+        }
+
+        break;
+    case TT_RETURN:
+        if (parse_return(state, tok, &root) < 0) {
             return -1;
         }
 

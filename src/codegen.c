@@ -42,6 +42,39 @@ cg_emit_proc(struct bup_state *state, struct ast_node *root)
     return retval;
 }
 
+/*
+ * Emit a return to assembly
+ *
+ * @state: Compiler state
+ * @root:  Root node of procedure
+ *
+ * Returns zero on success
+ */
+static int
+cg_emit_return(struct bup_state *state, struct ast_node *root)
+{
+    struct ast_node *node;
+
+    if (state == NULL || root == NULL) {
+        errno = -EINVAL;
+        return -1;
+    }
+
+    if (root->type != AST_RETURN) {
+        errno = -EINVAL;
+        return -1;
+    }
+
+    /* TODO: Support void returns */
+    if (root->right == NULL) {
+        trace_error(state, "void returns not yet supported\n");
+        return -1;
+    }
+
+    node = root->right;
+    return mu_cg_retimm(state, MSIZE_DWORD, node->v);
+}
+
 int
 cg_compile_node(struct bup_state *state, struct ast_node *root)
 {
@@ -53,6 +86,12 @@ cg_compile_node(struct bup_state *state, struct ast_node *root)
     switch (root->type) {
     case AST_PROC:
         if (cg_emit_proc(state, root) < 0) {
+            return -1;
+        }
+
+        return 0;
+    case AST_RETURN:
+        if (cg_emit_return(state, root) < 0) {
             return -1;
         }
 

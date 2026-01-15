@@ -12,12 +12,16 @@
 /*
  * Represents valid AST types
  *
- * @AST_NONE: No type associated
- * @AST_PROC: Procedure
+ * @AST_NONE:   No type associated
+ * @AST_PROC:   Procedure
+ * @AST_NUMBER: Is a number
+ * @AST_RETURN: Return statement
  */
 typedef enum {
     AST_NONE,
     AST_PROC,
+    AST_NUMBER,
+    AST_RETURN
 } ast_type_t;
 
 /*
@@ -26,12 +30,19 @@ typedef enum {
  *
  * @type: Node type
  * @symbol: Program symbol associated with node
+ * @left: Left node
+ * @right: Right node
  * @epilogue: Returns true if node is epilogue
  */
 struct ast_node {
     ast_type_t type;
     struct symbol *symbol;
+    struct ast_node *left;
+    struct ast_node *right;
     uint8_t epilogue : 1;
+    union {
+        ssize_t v;
+    };
 };
 
 /*
