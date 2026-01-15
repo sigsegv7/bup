@@ -719,6 +719,43 @@ parse_break(struct bup_state *state, struct token *tok, struct ast_node **res)
 }
 
 /*
+ * Parse a continue statement
+ *
+ * @state: Compiler state
+ * @tok:   Last token
+ * @res:   AST node result
+ */
+static int
+parse_continue(struct bup_state *state, struct token *tok, struct ast_node **res)
+{
+    struct ast_node *root;
+
+    if (state == NULL || res == NULL) {
+        return -1;
+    }
+
+    if (res == NULL) {
+        return -1;
+    }
+
+    if (tok->type != TT_CONT) {
+        return -1;
+    }
+
+    if (parse_expect(state, tok, TT_SEMI) < 0) {
+        return -1;
+    }
+
+    if (ast_alloc_node(state, AST_CONT, &root) < 0) {
+        trace_error(state, "failed to allocate AST_CONT\n");
+        return -1;
+    }
+
+    *res = root;
+    return 0;
+}
+
+/*
  * Parse the program source
  *
  * @state: Compiler state
@@ -762,6 +799,12 @@ parse_program(struct bup_state *state, struct token *tok)
         break;
     case TT_BREAK:
         if (parse_break(state, tok, &root) < 0) {
+            return -1;
+        }
+
+        break;
+    case TT_CONT:
+        if (parse_continue(state, tok, &root) < 0) {
             return -1;
         }
 

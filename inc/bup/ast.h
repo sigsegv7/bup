@@ -20,6 +20,8 @@
  * @AST_LOOP:   Loop block
  * @AST_VAR:    Variable declaration
  * @AST_VARDEF: Variable definition
+ * @AST_BREAK:  Break statement
+ * @AST_CONT:   Continue statement
  */
 typedef enum {
     AST_NONE,
@@ -30,7 +32,8 @@ typedef enum {
     AST_LOOP,
     AST_VAR,
     AST_VARDEF,
-    AST_BREAK
+    AST_BREAK,
+    AST_CONT
 } ast_type_t;
 
 /*

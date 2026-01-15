@@ -266,6 +266,31 @@ cg_emit_vardef(struct bup_state *state, struct ast_node *root)
     );
 }
 
+/*
+ * Emit a continue
+ *
+ * @state: Compiler state
+ * @root:  Root node of continue
+ */
+static int
+cg_emit_cont(struct bup_state *state, struct ast_node *root)
+{
+    char label_buf[32];
+
+    if (state == NULL || root == NULL) {
+        errno = -EINVAL;
+        return -1;
+    }
+
+    if (root->type != AST_CONT) {
+        errno = -EINVAL;
+        return -1;
+    }
+
+    snprintf(label_buf, sizeof(label_buf), "L.%zu", state->loop_count - 1);
+    return mu_cg_jmp(state, label_buf);
+}
+
 int
 cg_compile_node(struct bup_state *state, struct ast_node *root)
 {
@@ -307,6 +332,12 @@ cg_compile_node(struct bup_state *state, struct ast_node *root)
         return 0;
     case AST_BREAK:
         if (cg_emit_break(state, root) < 0) {
+            return -1;
+        }
+
+        return 0;
+    case AST_CONT:
+        if (cg_emit_cont(state, root) < 0) {
             return -1;
         }
 
