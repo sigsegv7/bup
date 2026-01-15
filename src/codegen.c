@@ -47,7 +47,7 @@ cg_emit_proc(struct bup_state *state, struct ast_node *root)
  * Emit a return to assembly
  *
  * @state: Compiler state
- * @root:  Root node of procedure
+ * @root:  Root node of return
  *
  * Returns zero on success
  */
@@ -114,7 +114,7 @@ cg_emit_asm(struct bup_state *state, struct ast_node *root)
  * Emit a loop
  *
  * @state: Compiler state
- * @root:  Root node of inline assembly
+ * @root:  Root node of loop
  *
  * Returns zero on success
  */
