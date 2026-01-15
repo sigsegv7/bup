@@ -92,3 +92,20 @@ mu_cg_inject(struct bup_state *state, char *line)
 
     return 0;
 }
+
+int
+mu_cg_jmp(struct bup_state *state, char *label)
+{
+    if (state == NULL || label == NULL) {
+        errno = -EINVAL;
+        return -1;
+    }
+
+    fprintf(
+        state->out_fp,
+        "\tjmp %s\n",
+        label
+    );
+
+    return 0;
+}

@@ -84,4 +84,14 @@ int mu_cg_retimm(struct bup_state *state, msize_t size, ssize_t imm);
  */
 int mu_cg_inject(struct bup_state *state, char *line);
 
+/*
+ * Generate a jump to a specific label
+ *
+ * @state: Comiler state
+ * @label: Label to jump to
+ *
+ * Returns zero on success
+ */
+int mu_cg_jmp(struct bup_state *state, char *label);
+
 #endif  /* !BUP_MU_H */
