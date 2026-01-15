@@ -246,6 +246,8 @@ parse_rbrace(struct bup_state *state, struct token *tok)
         if (cg_compile_node(state, root) < 0) {
             return -1;
         }
+
+        state->this_proc = NULL;
         break;
     default:
         break;
@@ -373,6 +375,12 @@ parse_proc(struct bup_state *state, struct token *tok, struct ast_node **res)
         return -1;
     }
 
+    /* If we are already in a function, error */
+    if (state->this_proc != NULL) {
+        trace_error(state, "function nesting is not supported\n");
+        return -1;
+    }
+
     /* EXPECT 'proc' */
     if (tok->type != TT_PROC) {
         utok(state, "PROC", tokstr(tok));
@@ -441,6 +449,7 @@ parse_proc(struct bup_state *state, struct token *tok, struct ast_node **res)
             return -1;
         }
 
+        state->this_proc = symbol;
         root->symbol = symbol;
         *res = root;
         break;

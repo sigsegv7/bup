@@ -27,6 +27,7 @@
  * @out_fp:   Output file pointer
  * @scope_stack: Used to keep track of scope
  * @scope_depth: How deep in scope we are
+ * @this_proc:   Symbol of current procedure
  */
 struct bup_state {
     int in_fd;
@@ -38,6 +39,7 @@ struct bup_state {
     FILE *out_fp;
     tt_t scope_stack[SCOPE_STACK_MAX];
     uint8_t scope_depth;
+    struct symbol *this_proc;
 };
 
 /*
