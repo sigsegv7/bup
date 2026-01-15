@@ -50,6 +50,7 @@ static struct token last_token;
  */
 static const char *toktab[] = {
     [TT_NONE]       = "NONE",
+    [TT_ASM]        = "ASM",
     [TT_PLUS]       = "PLUS",
     [TT_MINUS]      = "MINUS",
     [TT_SLASH]      = "SLASH",

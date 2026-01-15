@@ -283,6 +283,54 @@ lexer_check_kw(struct bup_state *state, struct token *tok)
     return -1;
 }
 
+static int
+lexer_scan_asm(struct bup_state *state, struct token *tok)
+{
+    char c, *buf;
+    size_t bufcap, bufsz;
+
+    if (state == NULL || tok == NULL) {
+        errno = -EINVAL;
+        return -1;
+    }
+
+    bufcap = 8;
+    bufsz = 0;
+    if ((buf = malloc(bufcap)) == NULL) {
+        errno = -ENOMEM;
+        return -1;
+    }
+
+    c = lexer_nom(state, false);
+    while (lexer_is_ws(c)) {
+        c = lexer_nom(state, false);
+    }
+
+    lexer_putback_chr(state, c);
+    for (;;) {
+        c = lexer_nom(state, false);
+        if (c == '\n') {
+            buf[bufsz] = '\0';
+            break;
+        }
+
+        buf[bufsz++] = c;
+        if (bufsz >= bufcap - 1) {
+            bufcap += 8;
+            buf = realloc(buf, bufcap);
+        }
+
+        if (buf == NULL) {
+            errno = -ENOMEM;
+            return -1;
+        }
+    }
+
+    tok->s = ptrbox_strdup(&state->ptrbox, buf);
+    free(buf);
+    return 0;
+}
+
 int
 lexer_scan(struct bup_state *state, struct token *res)
 {
@@ -298,6 +346,13 @@ lexer_scan(struct bup_state *state, struct token *res)
     }
 
     switch (c) {
+    case '@':
+        res->type = TT_ASM;
+        res->c = c;
+        if (lexer_scan_asm(state, res) < 0) {
+            return -1;
+        }
+        return 0;
     case '+':
         res->type = TT_PLUS;
         res->c = c;
