@@ -74,4 +74,14 @@ int mu_cg_ret(struct bup_state *state);
  */
 int mu_cg_retimm(struct bup_state *state, msize_t size, ssize_t imm);
 
+/*
+ * Inject a line of assembly into the output source
+ *
+ * @state: Compiler state
+ * @line:  Line of assembly to inject
+ *
+ * Returns zero on success
+ */
+int mu_cg_inject(struct bup_state *state, char *line);
+
 #endif  /* !BUP_MU_H */

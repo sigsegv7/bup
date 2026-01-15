@@ -74,3 +74,20 @@ mu_cg_retimm(struct bup_state *state, msize_t size, ssize_t imm)
 
     return 0;
 }
+
+int
+mu_cg_inject(struct bup_state *state, char *line)
+{
+    if (state == NULL || line == NULL) {
+        errno = -EINVAL;
+        return -1;
+    }
+
+    fprintf(
+        state->out_fp,
+        "\t%s\n",
+        line
+    );
+
+    return 0;
+}
