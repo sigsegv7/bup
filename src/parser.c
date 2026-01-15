@@ -542,6 +542,11 @@ parse_loop(struct bup_state *state, struct token *tok, struct ast_node **res)
         return -1;
     }
 
+    if (state->this_proc == NULL) {
+        trace_error(state, "'loop' must be within a procedure\n");
+        return -1;
+    }
+
     if (parse_scan(state, tok) < 0) {
         ueof(state);
         return -1;
