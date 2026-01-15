@@ -16,6 +16,36 @@ static const char *rettab[] = {
     [MSIZE_QWORD] = "rax"
 };
 
+/* Program section lookup table */
+static const char *sectab[] = {
+    [SECTION_NONE] =    "none",
+    [SECTION_TEXT] =    ".text",
+    [SECTION_DATA] =    ".data",
+    [SECTION_BSS]  =    ".bss"
+};
+
+/*
+ * Ensure that the current section is of a specific type
+ *
+ * @state:   Compiler state
+ * @section: Section to assert
+ */
+static inline void
+cg_assert_section(struct bup_state *state, bin_section_t section)
+{
+    if (state == NULL || section >= SECTION_MAX) {
+        return;
+    }
+
+    if (section != state->cur_section) {
+        fprintf(
+            state->out_fp,
+            "[section %s]\n",
+            sectab[section]
+        );
+    }
+}
+
 int
 mu_cg_label(struct bup_state *state, const char *name, bool is_global)
 {
@@ -24,6 +54,7 @@ mu_cg_label(struct bup_state *state, const char *name, bool is_global)
         return -1;
     }
 
+    cg_assert_section(state, SECTION_TEXT);
     if (is_global) {
         fprintf(
             state->out_fp,

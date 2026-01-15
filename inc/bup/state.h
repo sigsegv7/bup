@@ -16,6 +16,17 @@
 #define SCOPE_STACK_MAX 8
 
 /*
+ * Represents valid program sections
+ */
+typedef enum {
+    SECTION_NONE,
+    SECTION_TEXT,
+    SECTION_DATA,
+    SECTION_BSS,
+    SECTION_MAX
+} bin_section_t;
+
+/*
  * Represents the compiler state
  *
  * @in_fd: Input file descriptor
@@ -30,6 +41,7 @@
  * @unreachable: If set, we are in unreachable code
  * @loop_count:  Number of program loops
  * @this_proc:   Symbol of current procedure
+ * @cur_section: Current program section
  */
 struct bup_state {
     int in_fd;
@@ -44,6 +56,7 @@ struct bup_state {
     uint8_t unreachable : 1;
     size_t loop_count;
     struct symbol *this_proc;
+    bin_section_t cur_section;
 };
 
 /*
