@@ -44,7 +44,10 @@ lexer_skip_line(struct bup_state *state)
             break;
         }
     }
+
+    ++state->line_num;
 }
+
 
 /*
  * Returns true if the given character counts
