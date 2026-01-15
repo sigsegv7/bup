@@ -67,7 +67,8 @@ mu_cg_retimm(struct bup_state *state, msize_t size, ssize_t imm)
 
     fprintf(
         state->out_fp,
-        "\tmov %s, %zd\n",
+        "\tmov %s, %zd\n"
+        "\tret\n",
         rettab[size],
         imm
     );
