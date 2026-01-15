@@ -164,7 +164,7 @@ cg_emit_loop(struct bup_state *state, struct ast_node *root)
  * Emit a variable
  *
  * @state: Compiler state
- * @root:  Root node of
+ * @root:  Root node of variable
  *
  * Returns zero on success
  */
