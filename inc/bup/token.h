@@ -40,6 +40,7 @@ typedef enum {
     TT_LOOP,    /* 'loop' */
     TT_BREAK,   /* 'break' */
     TT_CONT,    /* 'continue' */
+    TT_IF,      /* 'if' */
     TT_IDENT,   /* <IDENT> */
     TT_NUMBER,  /* <NUMBER> */
     TT_COMMENT, /* <COMMENT: ignored> */
