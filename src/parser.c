@@ -583,9 +583,11 @@ parse_loop(struct bup_state *state, struct token *tok, struct ast_node **res)
 static int
 parse_var(struct bup_state *state, struct token *tok, struct ast_node **res)
 {
+    struct token tmp_tok;
     struct ast_node *root;
     struct datum_type type;
     struct symbol *symbol;
+    bool is_global = false;
     int error;
 
     if (state == NULL || tok == NULL) {
@@ -600,6 +602,12 @@ parse_var(struct bup_state *state, struct token *tok, struct ast_node **res)
     if (state->this_proc != NULL) {
         trace_error(state, "local variables are currently unsupported\n");
         return -1;
+    }
+
+    /* Is this symbol global? */
+    if (parse_backstep(state, 1, &tmp_tok) == 0) {
+        if (tmp_tok.type == TT_PUB)
+            is_global = true;
     }
 
     if (parse_type(state, tok, &type) < 0) {
@@ -632,7 +640,9 @@ parse_var(struct bup_state *state, struct token *tok, struct ast_node **res)
         return -1;
     }
 
+    symbol->is_global = is_global;
     root->symbol = symbol;
+
     switch (tok->type) {
     case TT_SEMI:
         break;

@@ -192,7 +192,7 @@ cg_emit_var(struct bup_state *state, struct ast_node *root)
         type_to_msize(dtype->type),
         SECTION_DATA,
         0,
-        false
+        symbol->is_global
     );
 }
 
