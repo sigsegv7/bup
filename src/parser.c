@@ -1026,8 +1026,8 @@ parser_parse(struct bup_state *state)
         return -1;
     }
 
-    while ((error = parse_scan(state, &last_token)) == 0) {
-        if (parse_program(state, &last_token) < 0) {
+    while (parse_scan(state, &last_token) == 0) {
+        if ((error = parse_program(state, &last_token)) < 0) {
             return -1;
         }
     }
