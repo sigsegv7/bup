@@ -29,6 +29,8 @@ typedef enum {
     TT_LBRACE,  /* '{' */
     TT_RBRACE,  /* '}' */
     TT_EQUALS,  /* '=' */
+    TT_LPAREN,  /* '(' */
+    TT_RPAREN,  /* ')' */
     TT_PROC,    /* 'proc' */
     TT_PUB,     /* 'pub' */
     TT_RETURN,  /* 'return' */
