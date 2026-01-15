@@ -193,6 +193,9 @@ cg_compile_node(struct bup_state *state, struct ast_node *root)
         }
 
         return 0;
+    case AST_VAR:
+        trace_error(state, "variables are a TODO\n");
+        return -1;
     default:
         trace_error(state, "got bad ast node %d\n", root->type);
         break;

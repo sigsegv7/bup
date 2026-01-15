@@ -30,5 +30,6 @@ ast_alloc_node(struct bup_state *state, ast_type_t type, struct ast_node **res)
     if (res != NULL) {
         *res = node;
     }
+
     return 0;
 }
