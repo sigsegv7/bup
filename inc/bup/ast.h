@@ -23,6 +23,8 @@
  * @AST_BREAK:  Break statement
  * @AST_CONT:   Continue statement
  * @AST_IF:     If statement
+ * @AST_ASSIGN: Assignment of variable
+ * @AST_SYMBOL: Is a symbol
  */
 typedef enum {
     AST_NONE,
@@ -33,9 +35,11 @@ typedef enum {
     AST_LOOP,
     AST_VAR,
     AST_VARDEF,
+    AST_ASSIGN,
     AST_BREAK,
     AST_CONT,
-    AST_IF
+    AST_IF,
+    AST_SYMBOL
 } ast_type_t;
 
 /*

@@ -844,6 +844,88 @@ parse_if(struct bup_state *state, struct token *tok, struct ast_node **res)
 }
 
 /*
+ * Parse an encountered identifier
+ *
+ * @state: Compiler state
+ * @tok:   Last token
+ * @res:   AST root result
+ *
+ * Returns zero on success
+ */
+static int
+parse_ident(struct bup_state *state, struct token *tok, struct ast_node **res)
+{
+    struct ast_node *root, *expr;
+    struct ast_node *symbol_node;
+    struct symbol *symbol;
+
+    if (state == NULL || tok == NULL) {
+        return -1;
+    }
+
+    if (res == NULL) {
+        return -1;
+    }
+
+    if (tok->type != TT_IDENT) {
+        return -1;
+    }
+
+    symbol = symbol_from_name(&state->symtab, tok->s);
+    if (symbol == NULL) {
+        trace_error(state, "undefined reference to %s\n", tok->s);
+        return -1;
+    }
+
+    if (parse_scan(state, tok) < 0) {
+        ueof(state);
+        return -1;
+    }
+
+    switch (tok->type) {
+    case TT_EQUALS:
+        if (symbol->type != SYMBOL_VAR) {
+            trace_error(state, "cannot re-assign to non-variable\n");
+            return -1;
+        }
+
+        if (ast_alloc_node(state, AST_ASSIGN, &root) < 0) {
+            trace_error(state, "failed to allocate AST_ASSIGN\n");
+            return -1;
+        }
+
+        if (parse_scan(state, tok) < 0) {
+            ueof(state);
+            return -1;
+        }
+
+        if (parse_binexpr(state, tok, &expr) < 0) {
+            return -1;
+        }
+
+        if (parse_expect(state, tok, TT_SEMI) < 0) {
+            return -1;
+        }
+
+        if (ast_alloc_node(state, AST_SYMBOL, &symbol_node) < 0) {
+            trace_error(state, "failed to allocate AST_SYMBOL\n");
+            return -1;
+        }
+
+        symbol_node->symbol = symbol;
+        root->left = symbol_node;
+        root->right = expr;
+        *res = root;
+        return 0;
+    default:
+        utok1(state, tok);
+        break;
+    }
+
+    return -1;
+}
+
+/*
  * Parse the program source
  *
  * @state: Compiler state
@@ -903,6 +985,10 @@ parse_program(struct bup_state *state, struct token *tok)
         }
 
         break;
+    case TT_IDENT:
+        if (parse_ident(state, tok, &root) < 0) {
+            return -1;
+        }
     case TT_PUB:
         /* Modifier */
         break;

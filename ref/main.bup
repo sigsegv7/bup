@@ -25,6 +25,12 @@ u32 bar = 123_456;
 //
 pub proc main -> u32
 {
+    //
+    // Variables that have already be initialized may have their
+    // values reassigned like so
+    //
+    foo = 2;
+
     if (1) {
         @ nop
     }

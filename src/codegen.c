@@ -344,6 +344,61 @@ cg_emit_if(struct bup_state *state, struct ast_node *root)
     return mu_cg_icmpnz(state, label_buf, expr->v);
 }
 
+/*
+ * Emit an assign
+ *
+ * @state: Compiler state
+ * @root:  Node root of assign
+ */
+static int
+cg_emit_assign(struct bup_state *state, struct ast_node *root)
+{
+    struct datum_type *dtype;
+    struct ast_node *symbol_node, *value_node;
+    struct symbol *symbol;
+
+    if (state == NULL || root == NULL) {
+        errno = -EINVAL;
+        return -1;
+    }
+
+    if (root->type != AST_ASSIGN) {
+        errno = -EINVAL;
+        return -1;
+    }
+
+    if ((value_node = root->right) == NULL) {
+        trace_error(state, "assign has no rhs\n");
+        errno = -EIO;
+        return -1;
+    }
+
+    /* TODO: Support a non-numeric lhs */
+    if (value_node->type != AST_NUMBER) {
+        trace_error(state, "non-numeric rhs for assign unsupported\n");
+        return -1;
+    }
+
+    if ((symbol_node = root->left) == NULL) {
+        trace_error(state, "assign has no lhs\n");
+        errno = -EIO;
+        return -1;
+    }
+
+    if ((symbol = symbol_node->symbol) == NULL) {
+        errno = -EIO;
+        return -1;
+    }
+
+    dtype = &symbol->data_type;
+    return mu_cg_istorevar(
+        state,
+        type_to_msize(dtype->type),
+        symbol->name,
+        value_node->v
+    );
+}
+
 int
 cg_compile_node(struct bup_state *state, struct ast_node *root)
 {
@@ -403,6 +458,12 @@ cg_compile_node(struct bup_state *state, struct ast_node *root)
         return 0;
     case AST_IF:
         if (cg_emit_if(state, root) < 0) {
+            return -1;
+        }
+
+        return 0;
+    case AST_ASSIGN:
+        if (cg_emit_assign(state, root) < 0) {
             return -1;
         }
 
