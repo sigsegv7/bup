@@ -26,6 +26,27 @@ lexer_putback_chr(struct bup_state *state, char c)
 }
 
 /*
+ * Skip an entire line
+ *
+ * @state: Compiler state
+ */
+static void
+lexer_skip_line(struct bup_state *state)
+{
+    char c;
+
+    if (state == NULL) {
+        return;
+    }
+
+    while (read(state->in_fd, &c, 1) > 0) {
+        if (c == '\n') {
+            break;
+        }
+    }
+}
+
+/*
  * Returns true if the given character counts
  * as a whitespace character.
  */
@@ -294,6 +315,13 @@ lexer_scan(struct bup_state *state, struct token *res)
     case '/':
         res->type = TT_SLASH;
         res->c = c;
+        if ((c = lexer_nom(state, true)) != '/') {
+            lexer_putback_chr(state, c);
+            return 0;
+        }
+
+        lexer_skip_line(state);
+        res->type = TT_COMMENT;
         return 0;
     case '*':
         res->type = TT_STAR;

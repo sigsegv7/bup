@@ -71,7 +71,8 @@ static const char *toktab[] = {
     [TT_U64]        = "U64",
     [TT_VOID]       = "VOID",
     [TT_IDENT]      = "IDENT",
-    [TT_NUMBER]     = "NUMBER"
+    [TT_NUMBER]     = "NUMBER",
+    [TT_COMMENT]    = "COMMENT"
 };
 
 /*
@@ -481,6 +482,9 @@ parse_program(struct bup_state *state, struct token *tok)
         break;
     case TT_PUB:
         /* Modifier */
+        break;
+    case TT_COMMENT:
+        /* Ignored */
         break;
     case TT_RBRACE:
         if (parse_rbrace(state, tok) == TT_NONE) {

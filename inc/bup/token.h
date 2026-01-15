@@ -37,6 +37,7 @@ typedef enum {
     TT_VOID,    /* 'void' */
     TT_IDENT,   /* <IDENT> */
     TT_NUMBER,  /* <NUMBER> */
+    TT_COMMENT, /* <COMMENT: ignored> */
 } tt_t;
 
 /*
