@@ -279,6 +279,22 @@ parse_rbrace(struct bup_state *state, struct token *tok)
         }
 
         break;
+    case TT_IF:
+        if (state->unreachable) {
+            state->unreachable = 0;
+            break;
+        }
+
+        if (ast_alloc_node(state, AST_IF, &root) < 0) {
+            trace_error(state, "failed to allocate AST_PROC\n");
+            return -1;
+        }
+
+        root->epilogue = 1;
+        if (cg_compile_node(state, root) < 0) {
+            return -1;
+        }
+        break;
     default:
         break;
     }
@@ -287,14 +303,14 @@ parse_rbrace(struct bup_state *state, struct token *tok)
 }
 
 /*
- * Parse a value
+ * Parse a binary expression
  *
  * @state: Compiler state
  * @tok:   Token result
  * @res:   AST node result
  */
 static int
-parse_value(struct bup_state *state, struct token *tok, struct ast_node **res)
+parse_binexpr(struct bup_state *state, struct token *tok, struct ast_node **res)
 {
     struct ast_node *root;
 
@@ -364,7 +380,7 @@ parse_return(struct bup_state *state, struct token *tok, struct ast_node **res)
         *res = root;
         return 0;
     default:
-        if (parse_value(state, tok, &value_node) < 0) {
+        if (parse_binexpr(state, tok, &value_node) < 0) {
             return -1;
         }
 
@@ -655,7 +671,7 @@ parse_var(struct bup_state *state, struct token *tok, struct ast_node **res)
             return -1;
         }
 
-        if (parse_value(state, tok, &expr) < 0) {
+        if (parse_binexpr(state, tok, &expr) < 0) {
             return -1;
         }
 
@@ -759,6 +775,74 @@ parse_continue(struct bup_state *state, struct token *tok, struct ast_node **res
 }
 
 /*
+ * Parse an if statement
+ *
+ * @state: Compiler state
+ * @tok:   Last token
+ * @res:   Result AST root is written here
+ */
+static int
+parse_if(struct bup_state *state, struct token *tok, struct ast_node **res)
+{
+    struct ast_node *root, *expr;
+
+    if (state == NULL || tok == NULL) {
+        return -1;
+    }
+
+    if (res == NULL) {
+        return -1;
+    }
+
+    if (tok->type != TT_IF) {
+        return -1;
+    }
+
+    if (state->this_proc == NULL) {
+        trace_error(state, "IF statement must be in procedure\n");
+        return -1;
+    }
+
+    /* EXPECT '(' */
+    if (parse_expect(state, tok, TT_LPAREN) < 0) {
+        return -1;
+    }
+
+    if (ast_alloc_node(state, AST_IF, &root) < 0) {
+        trace_error(state, "failed to allocate AST_IF\n");
+        return -1;
+    }
+
+    if (parse_scan(state, tok) < 0) {
+        ueof(state);
+        return -1;
+    }
+
+    /* EXPECT <EXPR> */
+    if (parse_binexpr(state, tok, &expr) < 0) {
+        return -1;
+    }
+
+    /* EXPECT ')' */
+    if (parse_expect(state, tok, TT_RPAREN) < 0) {
+        return -1;
+    }
+
+    if (parse_scan(state, tok) < 0) {
+        return -1;
+    }
+
+    if (parse_lbrace(state, TT_IF, tok) < 0) {
+        utok(state, "LBRACE", tokstr(tok));
+        return -1;
+    }
+
+    root->right = expr;
+    *res = root;
+    return 0;
+}
+
+/*
  * Parse the program source
  *
  * @state: Compiler state
@@ -808,6 +892,12 @@ parse_program(struct bup_state *state, struct token *tok)
         break;
     case TT_CONT:
         if (parse_continue(state, tok, &root) < 0) {
+            return -1;
+        }
+
+        break;
+    case TT_IF:
+        if (parse_if(state, tok, &root) < 0) {
             return -1;
         }
 

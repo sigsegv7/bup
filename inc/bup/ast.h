@@ -22,6 +22,7 @@
  * @AST_VARDEF: Variable definition
  * @AST_BREAK:  Break statement
  * @AST_CONT:   Continue statement
+ * @AST_IF:     If statement
  */
 typedef enum {
     AST_NONE,
@@ -33,7 +34,8 @@ typedef enum {
     AST_VAR,
     AST_VARDEF,
     AST_BREAK,
-    AST_CONT
+    AST_CONT,
+    AST_IF
 } ast_type_t;
 
 /*

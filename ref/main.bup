@@ -25,7 +25,9 @@ u32 bar = 123_456;
 //
 pub proc main -> u32
 {
-    @ mov rax, 1
-    @ nop
+    if (1) {
+        @ nop
+    }
+
     return 0;
 }

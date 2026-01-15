@@ -40,6 +40,7 @@ typedef enum {
  * @scope_depth: How deep in scope we are
  * @unreachable: If set, we are in unreachable code
  * @loop_count:  Number of program loops
+ * @if_count:    Number of if statements
  * @this_proc:   Symbol of current procedure
  * @cur_section: Current program section
  */
@@ -55,6 +56,7 @@ struct bup_state {
     uint8_t scope_depth;
     uint8_t unreachable : 1;
     size_t loop_count;
+    size_t if_count;
     struct symbol *this_proc;
     bin_section_t cur_section;
 };

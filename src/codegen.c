@@ -291,6 +291,59 @@ cg_emit_cont(struct bup_state *state, struct ast_node *root)
     return mu_cg_jmp(state, label_buf);
 }
 
+/*
+ * Emit an if
+ *
+ * @state: Compiler state
+ * @root:  Root node of if
+ */
+static int
+cg_emit_if(struct bup_state *state, struct ast_node *root)
+{
+    struct ast_node *expr;
+    char label_buf[32];
+
+    if (state == NULL || root == NULL) {
+        errno = -EINVAL;
+        return -1;
+    }
+
+    if (root->type != AST_IF) {
+        errno = -EINVAL;
+        return -1;
+    }
+
+    if ((expr = root->right) == NULL && !root->epilogue) {
+        errno = -EIO;
+        return -1;
+    }
+
+    /*
+     * If this is the epilogue, simply create a label
+     * to jump to if the condition fails.
+     */
+    if (root->epilogue) {
+        snprintf(
+            label_buf,
+            sizeof(label_buf),
+            "IF.%zu",
+            state->if_count - 1
+        );
+        mu_cg_label(state, label_buf, false);
+        return 0;
+    }
+
+    snprintf(
+        label_buf,
+        sizeof(label_buf),
+        "IF.%zu",
+        state->if_count++
+    );
+
+    /* TODO: Handle more complex expressions */
+    return mu_cg_icmpnz(state, label_buf, expr->v);
+}
+
 int
 cg_compile_node(struct bup_state *state, struct ast_node *root)
 {
@@ -344,6 +397,12 @@ cg_compile_node(struct bup_state *state, struct ast_node *root)
         return 0;
     case AST_VARDEF:
         if (cg_emit_vardef(state, root) < 0) {
+            return -1;
+        }
+
+        return 0;
+    case AST_IF:
+        if (cg_emit_if(state, root) < 0) {
             return -1;
         }
 
