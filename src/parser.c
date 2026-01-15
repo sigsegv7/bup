@@ -585,7 +585,7 @@ static int
 parse_var(struct bup_state *state, struct token *tok, struct ast_node **res)
 {
     struct token tmp_tok;
-    struct ast_node *root;
+    struct ast_node *root, *node, *expr;
     struct datum_type type;
     struct symbol *symbol;
     bool is_global = false;
@@ -645,6 +645,30 @@ parse_var(struct bup_state *state, struct token *tok, struct ast_node **res)
     root->symbol = symbol;
 
     switch (tok->type) {
+    case TT_EQUALS:
+        if (parse_scan(state, tok) < 0) {
+            ueof(state);
+            return -1;
+        }
+
+        if (parse_value(state, tok, &expr) < 0) {
+            return -1;
+        }
+
+        if (parse_expect(state, tok, TT_SEMI) < 0) {
+            return -1;
+        }
+
+        /* Make the node become root */
+        node = root;
+        if (ast_alloc_node(state, AST_VARDEF, &root) < 0) {
+            trace_error(state, "failed to allocate AST_VARDEF\n");
+            return -1;
+        }
+
+        root->left = node;
+        root->right = expr;
+        break;
     case TT_SEMI:
         break;
     default:

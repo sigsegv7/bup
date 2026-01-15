@@ -224,6 +224,48 @@ cg_emit_break(struct bup_state *state, struct ast_node *root)
     return 0;
 }
 
+/*
+ * Emit a variable definition
+ *
+ * @state: Compiler state
+ * @root:  Root node of variable
+ *
+ * Returns zero on success
+ */
+static int
+cg_emit_vardef(struct bup_state *state, struct ast_node *root)
+{
+    struct ast_node *expr;
+    struct symbol *symbol;
+    struct datum_type *dtype;
+
+    if (state == NULL || root == NULL) {
+        errno = -EINVAL;
+        return -1;
+    }
+
+    if ((symbol = root->left->symbol) == NULL) {
+        errno = -EIO;
+        return -1;
+    }
+
+    /* XXX: Perhaps handle binary expressions */
+    if ((expr = root->right) == NULL) {
+        errno = -EIO;
+        return -1;
+    }
+
+    dtype = &symbol->data_type;
+    return mu_cg_globvar(
+        state,
+        symbol->name,
+        type_to_msize(dtype->type),
+        SECTION_DATA,
+        expr->v,
+        symbol->is_global
+    );
+}
+
 int
 cg_compile_node(struct bup_state *state, struct ast_node *root)
 {
@@ -265,6 +307,12 @@ cg_compile_node(struct bup_state *state, struct ast_node *root)
         return 0;
     case AST_BREAK:
         if (cg_emit_break(state, root) < 0) {
+            return -1;
+        }
+
+        return 0;
+    case AST_VARDEF:
+        if (cg_emit_vardef(state, root) < 0) {
             return -1;
         }
 

@@ -18,7 +18,8 @@
  * @AST_RETURN: Return statement
  * @AST_ASM:    Assembly block
  * @AST_LOOP:   Loop block
- * @AST_VAR:    Variable
+ * @AST_VAR:    Variable declaration
+ * @AST_VARDEF: Variable definition
  */
 typedef enum {
     AST_NONE,
@@ -28,6 +29,7 @@ typedef enum {
     AST_ASM,
     AST_LOOP,
     AST_VAR,
+    AST_VARDEF,
     AST_BREAK
 } ast_type_t;
 
