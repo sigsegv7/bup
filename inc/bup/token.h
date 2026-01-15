@@ -39,6 +39,7 @@ typedef enum {
     TT_VOID,    /* 'void' */
     TT_LOOP,    /* 'loop' */
     TT_BREAK,   /* 'break' */
+    TT_CONT,    /* 'continue' */
     TT_IDENT,   /* <IDENT> */
     TT_NUMBER,  /* <NUMBER> */
     TT_COMMENT, /* <COMMENT: ignored> */

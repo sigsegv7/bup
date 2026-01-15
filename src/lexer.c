@@ -299,6 +299,13 @@ lexer_check_kw(struct bup_state *state, struct token *tok)
         }
 
         break;
+    case 'c':
+        if (strcmp(tok->s, "continue") == 0) {
+            tok->type = TT_CONT;
+            return 0;
+        }
+
+        break;
     }
 
     return -1;
