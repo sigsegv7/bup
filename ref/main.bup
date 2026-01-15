@@ -3,8 +3,26 @@
 // Provided under the BSD-3 clause.
 //
 
-u32 foo = 123456;
+//
+// Global variables can be declared and initialized to
+// zero, or defined and initialized to a value.
+//
+// Numbers can be seperated by an underscore ('_') to make them
+// more readable. It has no syntactic purpose other than to break
+// up a series of digits to make them more readable.
+//
+u8 foo;
+u32 bar = 123_456;
 
+//
+// Procedures are a collection of code that can be invoked one or more
+// times. They are denoted by the 'proc' keyword and identified with a
+// name that follows after. The type is given after the arrow operator
+// (->). By default, all procedures have internal linkage, meaning they
+// can only be referenced from within the current translation unit. To
+// make them visible outside the current translation unit, you must
+// prepend the 'pub' keyword.
+//
 pub proc main -> u32
 {
     @ mov rax, 1
