@@ -11,6 +11,8 @@ not the other way around.
 > Bup is currently still pre-alpha software and is undergoing
 > rapid development. Please be patient as we release new features.
 
+Example language files can be found within the ``ref/`` directory.
+
 ## Building
 
 To build Bup, simply run 'make'
