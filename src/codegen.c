@@ -196,6 +196,34 @@ cg_emit_var(struct bup_state *state, struct ast_node *root)
     );
 }
 
+/*
+ * Emit a break
+ *
+ * @state: Compiler state
+ * @root:  Root node of break
+ *
+ * Returns zero on success
+ */
+static int
+cg_emit_break(struct bup_state *state, struct ast_node *root)
+{
+    char label_buf[32];
+
+    if (state == NULL || root == NULL) {
+        errno = -EINVAL;
+        return -1;
+    }
+
+    if (root->type != AST_BREAK) {
+        errno = -EINVAL;
+        return -1;
+    }
+
+    snprintf(label_buf, sizeof(label_buf), "L.%zu.1", state->loop_count - 1);
+    mu_cg_jmp(state, label_buf);
+    return 0;
+}
+
 int
 cg_compile_node(struct bup_state *state, struct ast_node *root)
 {
@@ -231,6 +259,12 @@ cg_compile_node(struct bup_state *state, struct ast_node *root)
         return 0;
     case AST_VAR:
         if (cg_emit_var(state, root) < 0) {
+            return -1;
+        }
+
+        return 0;
+    case AST_BREAK:
+        if (cg_emit_break(state, root) < 0) {
             return -1;
         }
 

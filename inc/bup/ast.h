@@ -27,7 +27,8 @@ typedef enum {
     AST_RETURN,
     AST_ASM,
     AST_LOOP,
-    AST_VAR
+    AST_VAR,
+    AST_BREAK
 } ast_type_t;
 
 /*
