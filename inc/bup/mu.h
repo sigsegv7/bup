@@ -109,4 +109,16 @@ int mu_cg_inject(struct bup_state *state, char *line);
  */
 int mu_cg_jmp(struct bup_state *state, char *label);
 
+/*
+ * Generate a compare against an imm to test that it
+ * is not zero
+ *
+ * @state: Compiler state
+ * @label: Label to jump to if zero
+ * @imm:   Immediate to compare
+ *
+ * Returns zero on success
+ */
+int mu_cg_icmpnz(struct bup_state *state, const char *label, ssize_t imm);
+
 #endif  /* !BUP_MU_H */

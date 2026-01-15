@@ -7,6 +7,18 @@
 #include <errno.h>
 #include "bup/state.h"
 #include "bup/mu.h"
+#include "bup/trace.h"
+
+typedef int8_t reg_id_t;
+
+#define regmask(id)     \
+    (1 << (id))
+
+#define out_of_regs(state)      \
+    trace_error(                \
+        (state),                \
+        "out of registers!\n"   \
+    )
 
 /* Return size lookup table */
 static const char *rettab[] = {
@@ -32,6 +44,17 @@ static const char *sectab[] = {
     [SECTION_BSS]  =    ".bss"
 };
 
+/* General purpose register table */
+static const char *gpregtab[] = {
+    "r8", "r9",
+    "r10", "r11",
+    "r12", "r13",
+    "r14", "r15",
+};
+
+/* Bitmap used to allocate registers */
+static uint8_t gpreg_bitmap = 0;
+
 /*
  * Ensure that the current section is of a specific type
  *
@@ -54,6 +77,49 @@ cg_assert_section(struct bup_state *state, bin_section_t section)
 
         state->cur_section = section;
     }
+}
+
+/*
+ * Convert a general purpose register ID to a
+ * string name
+ *
+ * @id: ID to convert to name
+ */
+static inline const char *
+cg_gpreg_name(uint8_t id)
+{
+    if (id >= 8) {
+        return "bad";
+    }
+
+    return gpregtab[id];
+}
+
+/*
+ * Free a mask of general purpose registers
+ */
+static inline void
+cg_free_gpreg(uint8_t mask)
+{
+    gpreg_bitmap &= ~mask;
+}
+
+/*
+ * Allocate a general purpose register and return
+ * the ID on success, otherwise a less than zero
+ * value on failure.
+ */
+static reg_id_t
+cg_alloc_gpreg(void)
+{
+    for (uint8_t i = 0; i < 8; ++i) {
+        if ((gpreg_bitmap & (1 << i)) == 0) {
+            gpreg_bitmap |= (1 << i);
+            return i;
+        }
+    }
+
+    return -1;
 }
 
 int
@@ -183,5 +249,36 @@ mu_cg_globvar(struct bup_state *state, const char *name, msize_t size,
         imm
     );
 
+    return 0;
+}
+
+int
+mu_cg_icmpnz(struct bup_state *state, const char *label, ssize_t imm)
+{
+    reg_id_t reg;
+    const char *name;
+
+    if (state == NULL || label == NULL) {
+        errno = -EINVAL;
+        return -1;
+    }
+
+    if ((reg = cg_alloc_gpreg()) < 0) {
+        out_of_regs(state);
+        return -1;
+    }
+
+    name = cg_gpreg_name(reg);
+    fprintf(
+        state->out_fp,
+        "\tmov %s, %zd\n"
+        "\tor %s, %s\n"
+        "\tjz %s\n",
+        name, imm,
+        name, name,
+        label
+    );
+
+    cg_free_gpreg(regmask(reg));
     return 0;
 }
