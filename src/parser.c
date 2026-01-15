@@ -180,6 +180,7 @@ parse_type(struct bup_state *state, struct token *tok, struct datum_type *res)
         return -1;
     }
 
+    res->type = type;
     return 0;
 }
 
