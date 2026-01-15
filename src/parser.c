@@ -21,6 +21,13 @@
 #define tokstr(token)           \
     tokstr1((token)->type)      \
 
+#define utok1(state, tok)        \
+    trace_error(                 \
+        (state),                 \
+        "unexpected token %s\n", \
+        tokstr(tok)              \
+    )
+
 #define utok(state, exp, got)            \
     trace_error(                         \
         (state),                         \
