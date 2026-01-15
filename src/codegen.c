@@ -144,6 +144,14 @@ cg_emit_loop(struct bup_state *state, struct ast_node *root)
         snprintf(
             label_buf,
             sizeof(label_buf),
+            "L.%zu",
+            state->loop_count - 1
+        );
+
+        mu_cg_jmp(state, label_buf);
+        snprintf(
+            label_buf,
+            sizeof(label_buf),
             "L.%zu.1",
             state->loop_count - 1
         );
