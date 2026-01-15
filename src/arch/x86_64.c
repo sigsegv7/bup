@@ -51,6 +51,8 @@ cg_assert_section(struct bup_state *state, bin_section_t section)
             "[section %s]\n",
             sectab[section]
         );
+
+        state->cur_section = section;
     }
 }
 
