@@ -193,7 +193,11 @@ lexer_scan_digits(struct bup_state *state, int lc, struct token *res)
     buf[buf_i++] = lc;
     for (;;) {
         c = lexer_nom(state, true);
-        if (!isdigit(c) && c != '_') {
+        if (c == '_') {
+            continue;
+        }
+
+        if (!isdigit(c)) {
             buf[buf_i] = '\0';
             lexer_putback_chr(state, c);
             break;
