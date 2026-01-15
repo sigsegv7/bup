@@ -54,9 +54,17 @@ static int
 cg_emit_return(struct bup_state *state, struct ast_node *root)
 {
     struct ast_node *node;
+    struct symbol *cur_proc;
+    struct datum_type *dtype;
+    msize_t ret_size;
 
     if (state == NULL || root == NULL) {
         errno = -EINVAL;
+        return -1;
+    }
+
+    if ((cur_proc = state->this_proc) == NULL) {
+        trace_error(state, "return is not in procedure\n");
         return -1;
     }
 
@@ -71,8 +79,10 @@ cg_emit_return(struct bup_state *state, struct ast_node *root)
         return -1;
     }
 
+    dtype = &cur_proc->data_type;
+    ret_size = type_to_msize(dtype->type);
     node = root->right;
-    return mu_cg_retimm(state, MSIZE_DWORD, node->v);
+    return mu_cg_retimm(state, ret_size, node->v);
 }
 
 /*
