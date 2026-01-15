@@ -62,6 +62,7 @@ static const char *toktab[] = {
     [TT_SEMI]       = "SEMICOLON",
     [TT_LBRACE]     = "LBRACE",
     [TT_RBRACE]     = "RBRACE",
+    [TT_EQUALS]     = "EQUALS",
     [TT_ARROW]      = "ARROW",
     [TT_PROC]       = "PROC",
     [TT_PUB]        = "PUB",
