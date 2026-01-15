@@ -16,6 +16,14 @@ static const char *rettab[] = {
     [MSIZE_QWORD] = "rax"
 };
 
+/* Define size lookup table */
+static const char *dsztab[] = {
+    [MSIZE_BYTE] = "db",
+    [MSIZE_WORD] = "dw",
+    [MSIZE_DWORD] = "dd",
+    [MSIZE_QWORD] = "dq"
+};
+
 /* Program section lookup table */
 static const char *sectab[] = {
     [SECTION_NONE] =    "none",
@@ -136,6 +144,41 @@ mu_cg_jmp(struct bup_state *state, char *label)
         state->out_fp,
         "\tjmp %s\n",
         label
+    );
+
+    return 0;
+}
+
+int
+mu_cg_globvar(struct bup_state *state, const char *name, msize_t size,
+    bin_section_t sect, ssize_t imm, bool is_global)
+{
+    if (state == NULL || name == NULL) {
+        errno = -EINVAL;
+        return -1;
+    }
+
+    if (sect >= SECTION_MAX || size >= MSIZE_MAX) {
+        errno = -EINVAL;
+        return -1;
+    }
+
+    /* Put it in the section and global if we can */
+    cg_assert_section(state, sect);
+    if (is_global) {
+        fprintf(
+            state->out_fp,
+            "[global %s]\n",
+            name
+        );
+    }
+
+    fprintf(
+        state->out_fp,
+        "%s: %s %zd\n",
+        name,
+        dsztab[size],
+        imm
     );
 
     return 0;

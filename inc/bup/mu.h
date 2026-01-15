@@ -54,6 +54,21 @@ type_to_msize(bup_type_t type)
 int mu_cg_label(struct bup_state *state, const char *name, bool is_global);
 
 /*
+ * Create a global variable of a specific type
+ *
+ * @state: Compiler state
+ * @name:  Label name
+ * @size:  Label size
+ * @sect:  Label section
+ * @imm:   Value to initialize to
+ * @is_global: If true, label should be global
+ */
+int mu_cg_globvar(
+    struct bup_state *state, const char *name,
+    msize_t size, bin_section_t sect, ssize_t imm, bool is_global
+);
+
+/*
  * Generate a 'ret'
  *
  * @state: Compiler state

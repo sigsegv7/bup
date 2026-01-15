@@ -160,6 +160,42 @@ cg_emit_loop(struct bup_state *state, struct ast_node *root)
     return mu_cg_label(state, label_buf, false);
 }
 
+/*
+ * Emit a variable
+ *
+ * @state: Compiler state
+ * @root:  Root node of
+ *
+ * Returns zero on success
+ */
+static int
+cg_emit_var(struct bup_state *state, struct ast_node *root)
+{
+    struct symbol *symbol;
+    struct datum_type *dtype;
+
+    if (state == NULL || root == NULL) {
+        errno = -EINVAL;
+        return -1;
+    }
+
+    if ((symbol = root->symbol) == NULL) {
+        errno = -EIO;
+        return -1;
+    }
+
+
+    dtype = &symbol->data_type;
+    return mu_cg_globvar(
+        state,
+        symbol->name,
+        type_to_msize(dtype->type),
+        SECTION_DATA,
+        0,
+        false
+    );
+}
+
 int
 cg_compile_node(struct bup_state *state, struct ast_node *root)
 {
@@ -194,8 +230,11 @@ cg_compile_node(struct bup_state *state, struct ast_node *root)
 
         return 0;
     case AST_VAR:
-        trace_error(state, "variables are a TODO\n");
-        return -1;
+        if (cg_emit_var(state, root) < 0) {
+            return -1;
+        }
+
+        return 0;
     default:
         trace_error(state, "got bad ast node %d\n", root->type);
         break;
