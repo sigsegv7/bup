@@ -3,6 +3,7 @@
  * Provided under the BSD-3 clause.
  */
 
+#include <stdio.h>
 #include <stddef.h>
 #include <errno.h>
 #include "bup/codegen.h"
@@ -109,6 +110,48 @@ cg_emit_asm(struct bup_state *state, struct ast_node *root)
     return mu_cg_inject(state, root->s);
 }
 
+/*
+ * Emit a loop
+ *
+ * @state: Compiler state
+ * @root:  Root node of inline assembly
+ *
+ * Returns zero on success
+ */
+static int
+cg_emit_loop(struct bup_state *state, struct ast_node *root)
+{
+    char label_buf[32];
+
+    if (state == NULL || root == NULL) {
+        errno = -EINVAL;
+        return -1;
+    }
+
+    if (root->type != AST_LOOP) {
+        errno = -EINVAL;
+        return -1;
+    }
+
+    if (!root->epilogue) {
+        snprintf(
+            label_buf,
+            sizeof(label_buf),
+            "L.%zu",
+            state->loop_count++
+        );
+    } else {
+        snprintf(
+            label_buf,
+            sizeof(label_buf),
+            "L.%zu.1",
+            state->loop_count - 1
+        );
+    }
+
+    return mu_cg_label(state, label_buf, false);
+}
+
 int
 cg_compile_node(struct bup_state *state, struct ast_node *root)
 {
@@ -132,6 +175,12 @@ cg_compile_node(struct bup_state *state, struct ast_node *root)
         return 0;
     case AST_ASM:
         if (cg_emit_asm(state, root) < 0) {
+            return -1;
+        }
+
+        return 0;
+    case AST_LOOP:
+        if (cg_emit_loop(state, root) < 0) {
             return -1;
         }
 

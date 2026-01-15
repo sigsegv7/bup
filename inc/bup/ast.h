@@ -17,13 +17,15 @@
  * @AST_NUMBER: Is a number
  * @AST_RETURN: Return statement
  * @AST_ASM:    Assembly block
+ * @AST_LOOP:   Loop block
  */
 typedef enum {
     AST_NONE,
     AST_PROC,
     AST_NUMBER,
     AST_RETURN,
-    AST_ASM
+    AST_ASM,
+    AST_LOOP
 } ast_type_t;
 
 /*

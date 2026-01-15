@@ -256,6 +256,23 @@ parse_rbrace(struct bup_state *state, struct token *tok)
 
         state->this_proc = NULL;
         break;
+    case TT_LOOP:
+        if (state->unreachable) {
+            state->unreachable = 0;
+            break;
+        }
+
+        if (ast_alloc_node(state, AST_LOOP, &root) < 0) {
+            trace_error(state, "failed to allocate AST_PROC\n");
+            return -1;
+        }
+
+        root->epilogue = 1;
+        if (cg_compile_node(state, root) < 0) {
+            return -1;
+        }
+
+        break;
     default:
         break;
     }
@@ -504,6 +521,51 @@ parse_asm(struct bup_state *state, struct token *tok, struct ast_node **res)
 }
 
 /*
+ * Parse a 'loop' block
+ *
+ * @state: Compiler state
+ * @tok:   Token result
+ * @res: AST node result
+ *
+ * Returns zero on success
+ */
+static int
+parse_loop(struct bup_state *state, struct token *tok, struct ast_node **res)
+{
+    struct ast_node *root;
+
+    if (state == NULL || tok == NULL) {
+        return -1;
+    }
+
+    if (res == NULL) {
+        return -1;
+    }
+
+    if (parse_scan(state, tok) < 0) {
+        ueof(state);
+        return -1;
+    }
+
+    if (tok->type != TT_LBRACE) {
+        utok(state, "LBRACE", tokstr(tok));
+        return -1;
+    }
+
+    if (parse_lbrace(state, TT_LOOP, tok) < 0) {
+        return -1;
+    }
+
+    if (ast_alloc_node(state, AST_LOOP, &root) < 0) {
+        trace_error(state, "failed to allocate AST_LOOP\n");
+        return -1;
+    }
+
+    *res = root;
+    return 0;
+}
+
+/*
  * Parse the program source
  *
  * @state: Compiler state
@@ -535,6 +597,12 @@ parse_program(struct bup_state *state, struct token *tok)
         break;
     case TT_ASM:
         if (parse_asm(state, tok, &root) < 0) {
+            return -1;
+        }
+
+        break;
+    case TT_LOOP:
+        if (parse_loop(state, tok, &root) < 0) {
             return -1;
         }
 
