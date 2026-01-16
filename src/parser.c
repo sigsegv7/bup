@@ -1099,8 +1099,8 @@ parse_struct_fields(struct bup_state *state, struct token *tok, struct symbol *s
             error = symbol_field_new(
                 struc,
                 tok->s,
-                dtype.type,
-                NULL
+                BUP_TYPE_VOID,
+                &instance
             );
 
             if (error < 0) {
@@ -1108,6 +1108,7 @@ parse_struct_fields(struct bup_state *state, struct token *tok, struct symbol *s
                 return -1;
             }
 
+            instance->data_type = dtype;
             break;
         }
 
