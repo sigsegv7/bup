@@ -38,6 +38,7 @@ token_to_type(tt_t tt)
     case TT_U16:    return BUP_TYPE_U16;
     case TT_U32:    return BUP_TYPE_U32;
     case TT_U64:    return BUP_TYPE_U64;
+    case TT_UPTR:   return BUP_TYPE_U64;
     default:        return BUP_TYPE_BAD;
     }
 
