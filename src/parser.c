@@ -1025,6 +1025,7 @@ parse_struct_fields(struct bup_state *state, struct token *tok, struct symbol *s
 static int
 parse_struct(struct bup_state *state, struct token *tok, struct ast_node **res)
 {
+    struct token ahead;
     struct ast_node *root, *lhs;
     struct symbol *struct_symbol;
     int error;
@@ -1047,28 +1048,41 @@ parse_struct(struct bup_state *state, struct token *tok, struct ast_node **res)
         return -1;
     }
 
-    error = symbol_new(
-        &state->symtab,
-        tok->s,
-        BUP_TYPE_VOID,
-        &struct_symbol
-    );
-
-    if (error < 0) {
-        trace_error(state, "failed to allocate struct symbol\n");
-        return -1;
-    }
-
     /* EXPECT ';' OR '{' */
-    if (parse_scan(state, tok) < 0) {
+    if (parse_scan(state, &ahead) < 0) {
         ueof(state);
         return -1;
     }
 
-    switch (tok->type) {
+    switch (ahead.type) {
     case TT_SEMI:
+        error = symbol_new(
+            &state->symtab,
+            tok->s,
+            BUP_TYPE_VOID,
+            &struct_symbol
+        );
+
+        if (error < 0) {
+            trace_error(state, "failed to allocate struct symbol\n");
+            return -1;
+        }
+
         return 0;
     case TT_LBRACE:
+        error = symbol_new(
+            &state->symtab,
+            tok->s,
+            BUP_TYPE_VOID,
+            &struct_symbol
+        );
+
+        if (error < 0) {
+            trace_error(state, "failed to allocate struct symbol\n");
+            return -1;
+        }
+
+        *tok = ahead;
         if (parse_lbrace(state, TT_STRUCT, tok) < 0) {
             return -1;
         }
