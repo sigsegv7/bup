@@ -45,6 +45,7 @@ typedef enum {
     TT_CONT,    /* 'continue' */
     TT_IF,      /* 'if' */
     TT_STRUCT,  /* 'struct' */
+    TT_TYPE,    /* 'type' */
     TT_IDENT,   /* <IDENT> */
     TT_NUMBER,  /* <NUMBER> */
     TT_COMMENT, /* <COMMENT: ignored> */
