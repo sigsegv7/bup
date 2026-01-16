@@ -58,7 +58,6 @@ cg_emit_return(struct bup_state *state, struct ast_node *root)
     struct ast_node *node;
     struct symbol *cur_proc;
     struct datum_type *dtype;
-    msize_t ret_size;
 
     if (state == NULL || root == NULL) {
         errno = -EINVAL;
@@ -82,9 +81,8 @@ cg_emit_return(struct bup_state *state, struct ast_node *root)
     }
 
     dtype = &cur_proc->data_type;
-    ret_size = type_to_msize(dtype->type);
     node = root->right;
-    return mu_cg_retimm(state, ret_size, node->v);
+    return mu_cg_retimm(state, datum_msize(dtype), node->v);
 }
 
 /*
@@ -190,7 +188,7 @@ cg_emit_var(struct bup_state *state, struct ast_node *root)
     return mu_cg_globvar(
         state,
         symbol->name,
-        type_to_msize(dtype->type),
+        datum_msize(dtype),
         SECTION_DATA,
         0,
         symbol->is_global
@@ -394,7 +392,7 @@ cg_emit_assign(struct bup_state *state, struct ast_node *root)
     dtype = &symbol->data_type;
     return mu_cg_istorevar(
         state,
-        type_to_msize(dtype->type),
+        datum_msize(dtype),
         symbol->name,
         value_node->v
     );

@@ -23,6 +23,11 @@ typedef enum {
     MSIZE_MAX
 } msize_t;
 
+#define datum_msize(DATUM)              \
+    ((DATUM)->ptr_depth > 0)            \
+        ? MSIZE_QWORD                   \
+        : type_to_msize((DATUM)->type)
+
 /*
  * Convert a program type into a machine size
  * type

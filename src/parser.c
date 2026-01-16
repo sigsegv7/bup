@@ -225,6 +225,7 @@ parse_type(struct bup_state *state, struct token *tok, struct datum_type *res)
     }
 
     type = token_to_type(tok->type);
+    res->ptr_depth = 0;
 
     /*
      * If this is a bad token, verify that it is not
@@ -249,7 +250,6 @@ parse_type(struct bup_state *state, struct token *tok, struct datum_type *res)
         res->type = type;
     }
 
-    res->ptr_depth = 0;
     if (parse_scan(state, tok) < 0) {
         ueof(state);
         return -1;
@@ -719,7 +719,7 @@ parse_var(struct bup_state *state, struct token *tok, struct ast_node **res)
     error = symbol_new(
         &state->symtab,
         tok->s,
-        type.type,
+        BUP_TYPE_BAD,
         &symbol
     );
 
@@ -728,6 +728,7 @@ parse_var(struct bup_state *state, struct token *tok, struct ast_node **res)
         return -1;
     }
 
+    symbol->data_type = type;
     if (parse_scan(state, tok) < 0) {
         ueof(state);
         return -1;
@@ -952,6 +953,10 @@ parse_ident(struct bup_state *state, struct token *tok, struct ast_node **res)
     if (symbol == NULL) {
         trace_error(state, "undefined reference to %s\n", tok->s);
         return -1;
+    }
+
+    if (symbol->type == SYMBOL_TYPEDEF) {
+        return parse_var(state, tok, res);
     }
 
     if (parse_scan(state, tok) < 0) {
