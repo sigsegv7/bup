@@ -286,6 +286,23 @@ mu_cg_istorevar(struct bup_state *state, msize_t size,
 }
 
 int
+mu_cg_call(struct bup_state *state, const char *label)
+{
+    if (state == NULL || label == NULL) {
+        errno = -EINVAL;
+        return -1;
+    }
+
+    fprintf(
+        state->out_fp,
+        "\tcall %s\n",
+        label
+    );
+
+    return 0;
+}
+
+int
 mu_cg_icmpnz(struct bup_state *state, const char *label, ssize_t imm)
 {
     reg_id_t reg;

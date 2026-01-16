@@ -122,6 +122,16 @@ int mu_cg_jmp(struct bup_state *state, char *label);
 int mu_cg_icmpnz(struct bup_state *state, const char *label, ssize_t imm);
 
 /*
+ * Emit a call to a label
+ *
+ * @state: Compiler state
+ * @label: Label to call
+ *
+ * Returns zero on success
+ */
+int mu_cg_call(struct bup_state *state, const char *label);
+
+/*
  * Load an imm into a variable
  *
  * @state: Compiler state
