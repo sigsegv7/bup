@@ -51,7 +51,6 @@ compile(const char *path)
     }
 
     if (parser_parse(&state) < 0) {
-        printf("AAAA\n");
         return -1;
     }
 
