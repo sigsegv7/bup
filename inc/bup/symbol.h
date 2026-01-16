@@ -52,6 +52,13 @@ struct symbol {
     TAILQ_ENTRY(symbol) link;
 };
 
+#define FIELD_FOREACH(SYMBOL, VAR)   \
+    TAILQ_FOREACH(                   \
+        (VAR),                       \
+        &(SYMBOL)->fields,           \
+        field_link                   \
+    )
+
 /*
  * Represents the program symbol table
  *
