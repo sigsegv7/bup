@@ -361,7 +361,7 @@ mu_cg_struct(struct bup_state *state, const char *name, struct symbol *symbol)
         }
 
         dtype = &field->data_type;
-        size = type_to_msize(dtype->type);
+        size = datum_msize(dtype);
         if (size == MSIZE_BAD) {
             continue;
         }
