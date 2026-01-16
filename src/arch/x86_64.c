@@ -346,6 +346,7 @@ mu_cg_struct(struct bup_state *state, const char *name, struct symbol *symbol)
         return -1;
     }
 
+    cg_assert_section(state, SECTION_DATA);
     FIELD_FOREACH(symbol, field) {
         /* Handle struct instances */
         if (field->type == SYMBOL_STRUCT) {
