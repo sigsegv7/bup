@@ -245,6 +245,7 @@ parse_rbrace(struct bup_state *state, struct token *tok)
     scope = scope_pop(state);
     switch (scope) {
     case TT_PROC:
+        state->this_proc = NULL;
         if (state->unreachable) {
             state->unreachable = 0;
             break;
@@ -260,7 +261,6 @@ parse_rbrace(struct bup_state *state, struct token *tok)
             return -1;
         }
 
-        state->this_proc = NULL;
         break;
     case TT_LOOP:
         if (state->unreachable) {
