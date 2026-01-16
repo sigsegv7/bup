@@ -3,6 +3,11 @@
 // Provided under the BSD-3 clause.
 //
 
+//
+// Structures can be defined by using the 'struct'
+// keyword. Within each structure exists one or more
+// fields of a specific type.
+//
 struct point {
     u32 x;
     u32 y;
