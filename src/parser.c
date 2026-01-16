@@ -473,6 +473,44 @@ parse_return(struct bup_state *state, struct token *tok, struct ast_node **res)
 }
 
 /*
+ * Parse 'proc' arguments
+ *
+ * @state: Compiler state
+ * @tok:   Token result
+ * @res: AST node result
+ *
+ * Returns the number of arguments on success, otherwise a less
+ * than zero value on failure.
+ */
+static ssize_t
+parse_proc_args(struct bup_state *state, struct token *tok, struct ast_node **res)
+{
+    if (state == NULL || tok == NULL) {
+        return -1;
+    }
+
+    if (res == NULL) {
+        return -1;
+    }
+
+    if (tok->type != TT_LPAREN) {
+        return -1;
+    }
+
+    /* TODO: Support arguments */
+    if (parse_expect(state, tok, TT_RPAREN) < 0) {
+        return -1;
+    }
+
+    if (parse_scan(state, tok) < 0) {
+        ueof(state);
+        return -1;
+    }
+
+    return 0;
+}
+
+/*
  * Parse the 'proc' keyword
  *
  * @state: Compiler state
@@ -485,7 +523,7 @@ static int
 parse_proc(struct bup_state *state, struct token *tok, struct ast_node **res)
 {
     struct symbol *symbol;
-    struct ast_node *root;
+    struct ast_node *root, *args;
     struct datum_type type;
     int error;
     bool is_global = false;
@@ -533,8 +571,20 @@ parse_proc(struct bup_state *state, struct token *tok, struct ast_node **res)
         return -1;
     }
 
+    if (parse_scan(state, tok) < 0) {
+        ueof(state);
+        return -1;
+    }
+
+    /* MAYBE '(' : parse arguments if true */
+    if (tok->type == TT_LPAREN) {
+        if (parse_proc_args(state, tok, &args) < 0)
+            return -1;
+    }
+
     /* EXPECT '->' */
-    if (parse_expect(state, tok, TT_ARROW) < 0) {
+    if (tok->type != TT_ARROW) {
+        utok(state, "ARROW", tokstr(tok));
         return -1;
     }
 
