@@ -87,6 +87,41 @@ static const char *toktab[] = {
 };
 
 /*
+ * Parse a token in the parser-side putback buffer
+ *
+ * @state: Compiler state
+ * @tok:   Token to putback
+ */
+static inline void
+parse_putback(struct bup_state *state, struct token *tok)
+{
+    state->parse_putback = *tok;
+}
+
+/*
+ * Pop a token from the parser-side putback buffer
+ *
+ * @state: Compiler state
+ * @res:   Result is written here
+ *
+ * Returns zero on success
+ */
+static inline int
+parse_putback_pop(struct bup_state *state, struct token *res)
+{
+    struct token *top;
+
+    top = &state->parse_putback;
+    if (top->type == TT_NONE) {
+        return -1;
+    }
+
+    *res = *top;
+    top->type = TT_NONE;
+    return 0;
+}
+
+/*
  * Perform a lookbehind
  *
  * @state: Compiler state
@@ -125,6 +160,10 @@ parse_scan(struct bup_state *state, struct token *tok)
 {
     if (state == NULL) {
         return -1;
+    }
+
+    if (parse_putback_pop(state, tok) == 0) {
+        return 0;
     }
 
     if (lexer_scan(state, tok) < 0) {

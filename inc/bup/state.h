@@ -43,6 +43,7 @@ typedef enum {
  * @if_count:    Number of if statements
  * @this_proc:   Symbol of current procedure
  * @cur_section: Current program section
+ * @parse_putback: Parser putback buffer
  */
 struct bup_state {
     int in_fd;
@@ -59,6 +60,7 @@ struct bup_state {
     size_t if_count;
     struct symbol *this_proc;
     bin_section_t cur_section;
+    struct token parse_putback;
 };
 
 /*
