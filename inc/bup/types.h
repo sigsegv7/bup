@@ -24,9 +24,11 @@ typedef enum {
  * Represents a specific data type
  *
  * @type: Program data type
+ * @ptr_depth: Pointer level depth
  */
 struct datum_type {
     bup_type_t type;
+    size_t ptr_depth;
 };
 
 static inline bup_type_t

@@ -225,6 +225,11 @@ parse_type(struct bup_state *state, struct token *tok, struct datum_type *res)
     }
 
     type = token_to_type(tok->type);
+
+    /*
+     * If this is a bad token, verify that it is not
+     * a typedef we are referring to.
+     */
     if (type == BUP_TYPE_BAD) {
         /* Is this a typedef? */
         type_symbol = symbol_from_name(&state->symtab, tok->s);
@@ -240,10 +245,25 @@ parse_type(struct bup_state *state, struct token *tok, struct datum_type *res)
         }
 
         *res = type_symbol->data_type;
-        return 0;
+    } else {
+        res->type = type;
     }
 
-    res->type = type;
+    res->ptr_depth = 0;
+    if (parse_scan(state, tok) < 0) {
+        ueof(state);
+        return -1;
+    }
+
+    while (tok->type == TT_STAR) {
+        ++res->ptr_depth;
+        if (parse_scan(state, tok) < 0) {
+            ueof(state);
+            return -1;
+        }
+    }
+
+    parse_putback(state, tok);
     return 0;
 }
 
