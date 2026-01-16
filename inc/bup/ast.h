@@ -25,6 +25,7 @@
  * @AST_IF:     If statement
  * @AST_ASSIGN: Assignment of variable
  * @AST_SYMBOL: Is a symbol
+ * @AST_CALL:   Procedure call
  */
 typedef enum {
     AST_NONE,
@@ -39,7 +40,8 @@ typedef enum {
     AST_BREAK,
     AST_CONT,
     AST_IF,
-    AST_SYMBOL
+    AST_SYMBOL,
+    AST_CALL
 } ast_type_t;
 
 /*

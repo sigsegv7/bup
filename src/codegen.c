@@ -398,6 +398,54 @@ cg_emit_assign(struct bup_state *state, struct ast_node *root)
         value_node->v
     );
 }
+/*
+ * Emit a procedure call
+ *
+ * @state: Compiler state
+ * @root:  Node root of call
+ */
+static int
+cg_emit_call(struct bup_state *state, struct ast_node *root)
+{
+    struct ast_node *symbol_node;
+    struct symbol *symbol;
+
+    if (state == NULL || root == NULL) {
+        errno = -EINVAL;
+        return -1;
+    }
+
+    if (root->type != AST_CALL) {
+        errno = -EINVAL;
+        return -1;
+    }
+
+    if ((symbol_node = root->left) == NULL) {
+        trace_error(state, "no lhs for call node\n");
+        errno = -EINVAL;
+        return -1;
+    }
+
+    if (symbol_node->type != AST_SYMBOL) {
+        trace_error(state, "call node lhs is not symbol\n");
+        errno = -EIO;
+        return -1;
+    }
+
+    if ((symbol = symbol_node->symbol) == NULL) {
+        trace_error(state, "no symbol on call lhs\n");
+        errno = -EIO;
+        return -1;
+    }
+
+    if (symbol->type != SYMBOL_FUNC) {
+        trace_error(state, "called symbol is not function\n");
+        errno = -EIO;
+        return -1;
+    }
+
+    return mu_cg_call(state, symbol->name);
+}
 
 int
 cg_compile_node(struct bup_state *state, struct ast_node *root)
@@ -464,6 +512,12 @@ cg_compile_node(struct bup_state *state, struct ast_node *root)
         return 0;
     case AST_ASSIGN:
         if (cg_emit_assign(state, root) < 0) {
+            return -1;
+        }
+
+        return 0;
+    case AST_CALL:
+        if (cg_emit_call(state, root) < 0) {
             return -1;
         }
 

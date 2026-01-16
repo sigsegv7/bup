@@ -15,6 +15,15 @@ u8 foo;
 u32 bar = 123_456;
 
 //
+// This function has internal linkage
+//
+proc do_nothing -> u32
+{
+    @ nop
+    return 0;
+}
+
+//
 // Procedures are a collection of code that can be invoked one or more
 // times. They are denoted by the 'proc' keyword and identified with a
 // name that follows after. The type is given after the arrow operator
@@ -35,5 +44,6 @@ pub proc main -> u32
         @ nop
     }
 
+    do_nothing();
     return 0;
 }

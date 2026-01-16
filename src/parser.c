@@ -918,6 +918,39 @@ parse_ident(struct bup_state *state, struct token *tok, struct ast_node **res)
         root->right = expr;
         *res = root;
         return 0;
+    case TT_LPAREN:
+        /*
+         * Procedure call
+         *
+         * TODO: Handle arguments
+         */
+        if (symbol->type != SYMBOL_FUNC) {
+            trace_error(state, "cannot call non-function\n");
+            return -1;
+        }
+
+        if (parse_expect(state, tok, TT_RPAREN) < 0) {
+            return -1;
+        }
+
+        if (parse_expect(state, tok, TT_SEMI) < 0) {
+            return -1;
+        }
+
+        if (ast_alloc_node(state, AST_CALL, &root) < 0) {
+            trace_error(state, "failed to allocate AST_CALL\n");
+            return -1;
+        }
+
+        if (ast_alloc_node(state, AST_SYMBOL, &symbol_node) < 0) {
+            trace_error(state, "failed to allocate AST_SYMBOL\n");
+            return -1;
+        }
+
+        symbol_node->symbol = symbol;
+        root->left = symbol_node;
+        *res = root;
+        return 0;
     default:
         utok1(state, tok);
         break;
