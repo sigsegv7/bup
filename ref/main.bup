@@ -4,6 +4,13 @@
 //
 
 //
+// Type aliases may be created with the 'type' keyword followed
+// by a type to alias, the arrow operator ('->') and the alias
+// itself.
+//
+type u8 -> byte;
+
+//
 // Structures can be defined by using the 'struct'
 // keyword. Within each structure exists one or more
 // fields of a specific type.

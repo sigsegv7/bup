@@ -174,6 +174,7 @@ parse_expect(struct bup_state *state, struct token *tok, tt_t what)
 static int
 parse_type(struct bup_state *state, struct token *tok, struct datum_type *res)
 {
+    struct symbol *type_symbol;
     bup_type_t type;
 
     if (state == NULL || tok == NULL) {
@@ -186,8 +187,21 @@ parse_type(struct bup_state *state, struct token *tok, struct datum_type *res)
 
     type = token_to_type(tok->type);
     if (type == BUP_TYPE_BAD) {
-        utok(state, "TYPE", tokstr(tok));
-        return -1;
+        /* Is this a typedef? */
+        type_symbol = symbol_from_name(&state->symtab, tok->s);
+        if (type_symbol == NULL) {
+            utok(state, "TYPE", tokstr(tok));
+            return -1;
+        }
+
+        /* Verify that it is indeed a typedef*/
+        if (type_symbol->type != SYMBOL_TYPEDEF) {
+            utok(state, "TYPE", tokstr(tok));
+            return -1;
+        }
+
+        *res = type_symbol->data_type;
+        return 0;
     }
 
     res->type = type;
@@ -1212,6 +1226,72 @@ parse_struct(struct bup_state *state, struct token *tok, struct ast_node **res)
 }
 
 /*
+ * Parse the 'type' keyword
+ *
+ * @state: Compiler state
+ * @tok:   Last token
+ *
+ * Returns zero on success
+ */
+static int
+parse_typedef(struct bup_state *state, struct token *tok)
+{
+    struct symbol *type_symbol;
+    struct datum_type type;
+    int error;
+
+    if (state == NULL || tok == NULL) {
+        return -1;
+    }
+
+    /* EXPECT 'type' */
+    if (tok->type != TT_TYPE) {
+        return -1;
+    }
+
+    if (parse_scan(state, tok) < 0) {
+        ueof(state);
+        return -1;
+    }
+
+    /* EXPECT <TYPE> */
+    if (parse_type(state, tok, &type) < 0) {
+        return -1;
+    }
+
+    /* EXPECT '->' */
+    if (parse_expect(state, tok, TT_ARROW) < 0) {
+        return -1;
+    }
+
+    /* EXPECT <IDENT> */
+    if (parse_expect(state, tok, TT_IDENT) < 0) {
+        return -1;
+    }
+
+    error = symbol_new(
+        &state->symtab,
+        tok->s,
+        BUP_TYPE_VOID,
+        &type_symbol
+    );
+
+    if (error < 0) {
+        trace_error(state, "failed to create type symbol\n");
+        return -1;
+    }
+
+    /* EXPECT <SEMI> */
+    if (parse_expect(state, tok, TT_SEMI) < 0) {
+        return -1;
+    }
+
+    type_symbol->data_type = type;
+    type_symbol->type = SYMBOL_TYPEDEF;
+    return 0;
+}
+
+/*
  * Parse the program source
  *
  * @state: Compiler state
@@ -1279,6 +1359,12 @@ parse_program(struct bup_state *state, struct token *tok)
         break;
     case TT_STRUCT:
         if (parse_struct(state, tok, &root) < 0) {
+            return -1;
+        }
+
+        break;
+    case TT_TYPE:
+        if (parse_typedef(state, tok) < 0) {
             return -1;
         }
 

@@ -25,6 +25,7 @@ typedef enum {
     SYMBOL_VAR,
     SYMBOL_FUNC,
     SYMBOL_STRUCT,
+    SYMBOL_TYPEDEF
 } sym_type_t;
 
 /*
