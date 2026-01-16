@@ -398,6 +398,7 @@ cg_emit_assign(struct bup_state *state, struct ast_node *root)
         value_node->v
     );
 }
+
 /*
  * Emit a procedure call
  *
@@ -445,6 +446,56 @@ cg_emit_call(struct bup_state *state, struct ast_node *root)
     }
 
     return mu_cg_call(state, symbol->name);
+}
+
+/*
+ * Emit a structure
+ *
+ * @state: Compiler state
+ * @root:  Node root of structure
+ */
+static int
+cg_emit_struct(struct bup_state *state, struct ast_node *root)
+{
+    struct symbol *symbol;
+    struct ast_node *symbol_node;
+    struct symbol *field;
+
+    if (state == NULL || root == NULL) {
+        errno = -EINVAL;
+        return -1;
+    }
+
+    if (root == NULL) {
+        errno = -EINVAL;
+        return -1;
+    }
+
+    if (root->type != AST_STRUCT) {
+        errno = -EINVAL;
+        return -1;
+    }
+
+    if ((symbol_node = root->left) == NULL) {
+        trace_error(state, "struct has no lhs\n");
+        return -1;
+    }
+
+    if ((symbol = symbol_node->symbol) == NULL) {
+        trace_error(state, "struct lhs has no symbol\n");
+        return -1;
+    }
+
+    FIELD_FOREACH(symbol, field) {
+        printf(
+            "~ detected field %s.%s\n",
+            symbol->name,
+            field->name
+        );
+    }
+
+    trace_error(state, "structs are a TODO\n");
+    return -1;
 }
 
 int
@@ -518,6 +569,12 @@ cg_compile_node(struct bup_state *state, struct ast_node *root)
         return 0;
     case AST_CALL:
         if (cg_emit_call(state, root) < 0) {
+            return -1;
+        }
+
+        return 0;
+    case AST_STRUCT:
+        if (cg_emit_struct(state, root) < 0) {
             return -1;
         }
 

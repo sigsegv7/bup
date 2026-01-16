@@ -41,7 +41,8 @@ typedef enum {
     AST_CONT,
     AST_IF,
     AST_SYMBOL,
-    AST_CALL
+    AST_CALL,
+    AST_STRUCT,
 } ast_type_t;
 
 /*

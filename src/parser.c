@@ -960,6 +960,150 @@ parse_ident(struct bup_state *state, struct token *tok, struct ast_node **res)
     return -1;
 }
 
+static int
+parse_struct_fields(struct bup_state *state, struct token *tok, struct symbol *struc)
+{
+    struct datum_type dtype;
+    int error;
+
+    if (state == NULL || tok == NULL) {
+        return -1;
+    }
+
+    if (struc == NULL) {
+        return -1;
+    }
+
+    for (;;) {
+        if (parse_type(state, tok, &dtype) < 0) {
+            return -1;
+        }
+
+        if (parse_expect(state, tok, TT_IDENT) < 0) {
+            return -1;
+        }
+
+        error = symbol_field_new(
+            struc,
+            tok->s,
+            dtype.type,
+            NULL
+        );
+
+        if (error < 0) {
+            trace_error(state, "failed to allocate field symbol\n");
+            return -1;
+        }
+
+        if (parse_expect(state, tok, TT_SEMI) < 0) {
+            return -1;
+        }
+
+        if (parse_scan(state, tok) < 0) {
+            ueof(state);
+            return -1;
+        }
+
+        if (tok->type == TT_RBRACE) {
+            if (parse_rbrace(state, tok) < 0)
+                return -1;
+
+            break;
+        }
+    }
+
+    return 0;
+}
+
+/*
+ * Parse a structure
+ *
+ * @state: Compiler state
+ * @tok:   Last token
+ * @res:   AST node result
+ */
+static int
+parse_struct(struct bup_state *state, struct token *tok, struct ast_node **res)
+{
+    struct ast_node *root, *lhs;
+    struct symbol *struct_symbol;
+    int error;
+
+    if (state == NULL || tok == NULL) {
+        return -1;
+    }
+
+    if (res == NULL) {
+        return -1;
+    }
+
+    /* EXPECT 'struct' */
+    if (tok->type != TT_STRUCT) {
+        return -1;
+    }
+
+    /* EXPECT <IDENT> */
+    if (parse_expect(state, tok, TT_IDENT) < 0) {
+        return -1;
+    }
+
+    error = symbol_new(
+        &state->symtab,
+        tok->s,
+        BUP_TYPE_VOID,
+        &struct_symbol
+    );
+
+    if (error < 0) {
+        trace_error(state, "failed to allocate struct symbol\n");
+        return -1;
+    }
+
+    /* EXPECT ';' OR '{' */
+    if (parse_scan(state, tok) < 0) {
+        ueof(state);
+        return -1;
+    }
+
+    switch (tok->type) {
+    case TT_SEMI:
+        return 0;
+    case TT_LBRACE:
+        if (parse_lbrace(state, TT_STRUCT, tok) < 0) {
+            return -1;
+        }
+
+        if (parse_scan(state, tok) < 0) {
+            ueof(state);
+            return -1;
+        }
+
+        if (parse_struct_fields(state, tok, struct_symbol) < 0) {
+            return -1;
+        }
+
+        if (ast_alloc_node(state, AST_STRUCT, &root) < 0) {
+            trace_error(state, "failed to allocate AST_STRUCT\n");
+            return -1;
+        }
+
+        if (ast_alloc_node(state, AST_SYMBOL, &lhs) < 0) {
+            trace_error(state, "failed to allocate AST_SYMBOL\n");
+            return -1;
+        }
+
+        lhs->symbol = struct_symbol;
+        root->left = lhs;
+        *res = root;
+        return 0;
+    default:
+        utok1(state, tok);
+        break;
+    }
+
+    return -1;
+}
+
 /*
  * Parse the program source
  *
@@ -1024,6 +1168,13 @@ parse_program(struct bup_state *state, struct token *tok)
         if (parse_ident(state, tok, &root) < 0) {
             return -1;
         }
+
+        break;
+    case TT_STRUCT:
+        if (parse_struct(state, tok, &root) < 0) {
+            return -1;
+        }
+
         break;
     case TT_PUB:
         /* Modifier */
