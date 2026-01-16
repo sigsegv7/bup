@@ -11,7 +11,7 @@
 #include "bup/state.h"
 #include "bup/parser.h"
 
-#define BUP_VERSION "0.0.4"
+#define BUP_VERSION "0.0.5"
 
 /* Runtime flags */
 static bool asm_only = false;
