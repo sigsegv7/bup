@@ -15,6 +15,7 @@
 
 /* Runtime flags */
 static bool asm_only = false;
+static bool no_sections = false;
 static const char *binfmt = "elf64";
 
 static void
@@ -26,6 +27,7 @@ help(void)
         "[-h]   Display this help menu\n"
         "[-v]   Display the version\n"
         "[-a]   Output ASM file only [do not assemble]\n"
+        "[-s]   Disable sections in output\n"
         "Usage: bup <flags, ...> <files, ...>\n"
     );
 }
@@ -49,6 +51,10 @@ compile(const char *path)
     if (bup_state_init(path, &state) < 0) {
         printf("fatal: failed to initialize state\n");
         return -1;
+    }
+
+    if (no_sections) {
+        state.cur_section = SECTION_DISABLED;
     }
 
     if (parser_parse(&state) < 0) {
@@ -83,7 +89,7 @@ main(int argc, char **argv)
         return -1;
     }
 
-    while ((opt = getopt(argc, argv, "hvaf:")) != -1) {
+    while ((opt = getopt(argc, argv, "hvaf:s")) != -1) {
         switch (opt) {
         case 'h':
             help();
@@ -96,6 +102,9 @@ main(int argc, char **argv)
             break;
         case 'f':
             binfmt = strdup(optarg);
+            break;
+        case 's':
+            no_sections = true;
             break;
         }
     }

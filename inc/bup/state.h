@@ -19,6 +19,7 @@
  * Represents valid program sections
  */
 typedef enum {
+    SECTION_DISABLED,
     SECTION_NONE,
     SECTION_TEXT,
     SECTION_DATA,

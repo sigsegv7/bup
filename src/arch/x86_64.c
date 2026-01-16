@@ -76,6 +76,10 @@ cg_assert_section(struct bup_state *state, bin_section_t section)
         return;
     }
 
+    if (state->cur_section == SECTION_DISABLED) {
+        return;
+    }
+
     if (section != state->cur_section) {
         fprintf(
             state->out_fp,
