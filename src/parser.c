@@ -1024,6 +1024,7 @@ parse_program(struct bup_state *state, struct token *tok)
         if (parse_ident(state, tok, &root) < 0) {
             return -1;
         }
+        break;
     case TT_PUB:
         /* Modifier */
         break;
