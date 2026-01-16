@@ -3,6 +3,11 @@
 // Provided under the BSD-3 clause.
 //
 
+struct point {
+    u32 x;
+    u32 y;
+}
+
 //
 // Global variables can be declared and initialized to
 // zero, or defined and initialized to a value.

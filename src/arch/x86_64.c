@@ -332,3 +332,34 @@ mu_cg_icmpnz(struct bup_state *state, const char *label, ssize_t imm)
     cg_free_gpreg(regmask(reg));
     return 0;
 }
+
+int
+mu_cg_struct(struct bup_state *state, struct symbol *symbol)
+{
+    struct symbol *field;
+    struct datum_type *dtype;
+    msize_t size;
+
+    if (state == NULL || symbol == NULL) {
+        errno = -EINVAL;
+        return -1;
+    }
+
+    FIELD_FOREACH(symbol, field) {
+        dtype = &field->data_type;
+        size = type_to_msize(dtype->type);
+        if (size == MSIZE_BAD) {
+            continue;
+        }
+
+        fprintf(
+            state->out_fp,
+            "%s.%s: %s 0\n",
+            symbol->name,
+            field->name,
+            dsztab[size]
+        );
+    }
+
+    return 0;
+}

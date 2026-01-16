@@ -9,6 +9,7 @@
 #include <stdbool.h>
 #include "bup/state.h"
 #include "bup/types.h"
+#include "bup/symbol.h"
 
 /*
  * Represents valid machine size types
@@ -130,6 +131,16 @@ int mu_cg_icmpnz(struct bup_state *state, const char *label, ssize_t imm);
  * Returns zero on success
  */
 int mu_cg_call(struct bup_state *state, const char *label);
+
+/*
+ * Generate a structure from a struct symbol
+ *
+ * @state: Compiler state
+ * @symbol: Structure symbol
+ *
+ * Returns zero on success
+ */
+int mu_cg_struct(struct bup_state *state, struct symbol *symbol);
 
 /*
  * Load an imm into a variable

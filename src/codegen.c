@@ -459,7 +459,6 @@ cg_emit_struct(struct bup_state *state, struct ast_node *root)
 {
     struct symbol *symbol;
     struct ast_node *symbol_node;
-    struct symbol *field;
 
     if (state == NULL || root == NULL) {
         errno = -EINVAL;
@@ -486,16 +485,7 @@ cg_emit_struct(struct bup_state *state, struct ast_node *root)
         return -1;
     }
 
-    FIELD_FOREACH(symbol, field) {
-        printf(
-            "~ detected field %s.%s\n",
-            symbol->name,
-            field->name
-        );
-    }
-
-    trace_error(state, "structs are a TODO\n");
-    return -1;
+    return mu_cg_struct(state, symbol);
 }
 
 int
