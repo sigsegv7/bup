@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <string.h>
 #include <fcntl.h>
 #include "bup/state.h"
 #include "bup/parser.h"
@@ -82,7 +83,7 @@ main(int argc, char **argv)
         return -1;
     }
 
-    while ((opt = getopt(argc, argv, "hva")) != -1) {
+    while ((opt = getopt(argc, argv, "hvaf:")) != -1) {
         switch (opt) {
         case 'h':
             help();
@@ -92,6 +93,9 @@ main(int argc, char **argv)
             return -1;
         case 'a':
             asm_only = true;
+            break;
+        case 'f':
+            binfmt = strdup(optarg);
             break;
         }
     }
