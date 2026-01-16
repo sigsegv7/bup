@@ -1,0 +1,69 @@
+@ [bits 16]
+@ [org 0x7C00]
+
+//
+// Main entrypoint, this always belongs
+// at the top.
+//
+proc _start -> void
+{
+    @ xor ax, ax
+    @ mov ds, ax
+    @ mov es, ax
+    @ mov fs, ax
+    @ mov ss, ax
+    @ mov gs, ax
+    @ jmp 0x00:main
+}
+
+//
+// String a string using BIOS INT 10h
+//
+// [SI]: String base
+//
+proc printstr -> void
+{
+    @ putstr_loop:
+    @     mov ah, 0x0E
+    @     lodsb
+    @     or al, al
+    @     jz .exit
+    @     int 0x10
+    @     jmp putstr_loop
+    @ .exit:
+}
+
+//
+// Halt the processor
+//
+proc halt -> void
+{
+    loop {
+        @ cli
+        @ hlt
+    }
+}
+
+proc main -> void
+{
+    @ cli
+    @ cld
+    @ xor sp, sp
+    @ mov si, boot_msg
+
+    printstr();     // [SI=boot_msg]
+    halt();
+}
+
+//
+// String area
+//
+
+@ boot_msg: db "Hello, world!", 0x0D, 0x0A, 0x00
+
+//
+// Magic number
+//
+
+@ times 510 - ($ - $$) db 0
+@ dw 0xAA55
