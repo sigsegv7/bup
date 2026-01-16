@@ -40,6 +40,7 @@ cg_emit_proc(struct bup_state *state, struct ast_node *root)
         trace_debug("detected procedure %s\n", symbol->name);
         retval = mu_cg_label(state, symbol->name, symbol->is_global);
     }
+
     return retval;
 }
 
@@ -458,7 +459,8 @@ static int
 cg_emit_struct(struct bup_state *state, struct ast_node *root)
 {
     struct symbol *symbol;
-    struct ast_node *symbol_node;
+    struct symbol *instance;
+    struct ast_node *symbol_node, *instance_node;
 
     if (state == NULL || root == NULL) {
         errno = -EINVAL;
@@ -480,12 +482,22 @@ cg_emit_struct(struct bup_state *state, struct ast_node *root)
         return -1;
     }
 
+    if ((instance_node = root->right) == NULL) {
+        trace_error(state, "struct has no rhs\n");
+        return -1;
+    }
+
+    if ((instance = instance_node->symbol) == NULL) {
+        trace_error(state, "struct rhs has no symbol\n");
+        return -1;
+    }
+
     if ((symbol = symbol_node->symbol) == NULL) {
         trace_error(state, "struct lhs has no symbol\n");
         return -1;
     }
 
-    return mu_cg_struct(state, symbol);
+    return mu_cg_struct(state, instance->name, symbol);
 }
 
 int

@@ -14,6 +14,11 @@ struct point {
 }
 
 //
+// Structs may be instantiated like so
+//
+struct point xy;
+
+//
 // Global variables can be declared and initialized to
 // zero, or defined and initialized to a value.
 //

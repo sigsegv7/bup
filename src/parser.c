@@ -1026,8 +1026,9 @@ static int
 parse_struct(struct bup_state *state, struct token *tok, struct ast_node **res)
 {
     struct token ahead;
-    struct ast_node *root, *lhs;
+    struct ast_node *root, *lhs, *rhs;
     struct symbol *struct_symbol;
+    struct symbol *instance_symbol;
     int error;
 
     if (state == NULL || tok == NULL) {
@@ -1063,11 +1064,77 @@ parse_struct(struct bup_state *state, struct token *tok, struct ast_node **res)
             &struct_symbol
         );
 
+        struct_symbol->type = SYMBOL_STRUCT;
         if (error < 0) {
             trace_error(state, "failed to allocate struct symbol\n");
             return -1;
         }
 
+        return 0;
+    case TT_IDENT:
+        /*
+         * Struct instance
+         */
+
+        /* TODO */
+        if (state->this_proc != NULL) {
+            trace_error(state, "global structures supported only as of now\n");
+            return -1;
+        }
+
+        struct_symbol = symbol_from_name(
+            &state->symtab,
+            tok->s
+        );
+
+        if (struct_symbol == NULL) {
+            trace_error(state, "undefined reference to structure %s\n", tok->s);
+            return -1;
+        }
+
+        if (struct_symbol->type != SYMBOL_STRUCT) {
+            trace_error(state, "cannot instantiate non-structure\n");
+            return -1;
+        }
+
+        /* Create an instance symbol */
+        error = symbol_new(
+            &state->symtab,
+            ahead.s,
+            BUP_TYPE_VOID,
+            &instance_symbol
+        );
+
+        if (error < 0) {
+            trace_error(state, "failed to allocate instance symbol\n");
+            return -1;
+        }
+
+        if (parse_expect(state, tok, TT_SEMI) < 0) {
+            return -1;
+        }
+
+        if (ast_alloc_node(state, AST_STRUCT, &root) < 0) {
+            trace_error(state, "failed to allocate AST_STRUCT\n");
+            return -1;
+        }
+
+        if (ast_alloc_node(state, AST_SYMBOL, &lhs) < 0) {
+            trace_error(state, "failed to allocate lhs AST_SYMBOL\n");
+            return -1;
+        }
+
+        if (ast_alloc_node(state, AST_SYMBOL, &rhs) < 0) {
+            trace_error(state, "failed to allocate rhs AST_SYMBOL\n");
+            return -1;
+        }
+
+        rhs->symbol = instance_symbol;
+        lhs->symbol = struct_symbol;
+
+        root->right = rhs;
+        root->left = lhs;
+        *res = root;
         return 0;
     case TT_LBRACE:
         error = symbol_new(
@@ -1077,6 +1144,7 @@ parse_struct(struct bup_state *state, struct token *tok, struct ast_node **res)
             &struct_symbol
         );
 
+        struct_symbol->type = SYMBOL_STRUCT;
         if (error < 0) {
             trace_error(state, "failed to allocate struct symbol\n");
             return -1;
@@ -1096,19 +1164,6 @@ parse_struct(struct bup_state *state, struct token *tok, struct ast_node **res)
             return -1;
         }
 
-        if (ast_alloc_node(state, AST_STRUCT, &root) < 0) {
-            trace_error(state, "failed to allocate AST_STRUCT\n");
-            return -1;
-        }
-
-        if (ast_alloc_node(state, AST_SYMBOL, &lhs) < 0) {
-            trace_error(state, "failed to allocate AST_SYMBOL\n");
-            return -1;
-        }
-
-        lhs->symbol = struct_symbol;
-        root->left = lhs;
-        *res = root;
         return 0;
     default:
         utok1(state, tok);

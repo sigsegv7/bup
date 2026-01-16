@@ -136,11 +136,12 @@ int mu_cg_call(struct bup_state *state, const char *label);
  * Generate a structure from a struct symbol
  *
  * @state: Compiler state
+ * @name: Instance name
  * @symbol: Structure symbol
  *
  * Returns zero on success
  */
-int mu_cg_struct(struct bup_state *state, struct symbol *symbol);
+int mu_cg_struct(struct bup_state *state, const char *name, struct symbol *symbol);
 
 /*
  * Load an imm into a variable

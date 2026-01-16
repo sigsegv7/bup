@@ -334,7 +334,7 @@ mu_cg_icmpnz(struct bup_state *state, const char *label, ssize_t imm)
 }
 
 int
-mu_cg_struct(struct bup_state *state, struct symbol *symbol)
+mu_cg_struct(struct bup_state *state, const char *name, struct symbol *symbol)
 {
     struct symbol *field;
     struct datum_type *dtype;
@@ -355,7 +355,7 @@ mu_cg_struct(struct bup_state *state, struct symbol *symbol)
         fprintf(
             state->out_fp,
             "%s.%s: %s 0\n",
-            symbol->name,
+            name,
             field->name,
             dsztab[size]
         );
