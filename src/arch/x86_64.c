@@ -336,6 +336,7 @@ mu_cg_icmpnz(struct bup_state *state, const char *label, ssize_t imm)
 int
 mu_cg_struct(struct bup_state *state, const char *name, struct symbol *symbol)
 {
+    char name_buf[64];
     struct symbol *field;
     struct datum_type *dtype;
     msize_t size;
@@ -346,6 +347,19 @@ mu_cg_struct(struct bup_state *state, const char *name, struct symbol *symbol)
     }
 
     FIELD_FOREACH(symbol, field) {
+        /* Handle struct instances */
+        if (field->type == SYMBOL_STRUCT) {
+            snprintf(
+                name_buf,
+                sizeof(name_buf),
+                "%s.%s",
+                name,
+                field->name
+            );
+            mu_cg_struct(state, name_buf, field->parent);
+            continue;
+        }
+
         dtype = &field->data_type;
         size = type_to_msize(dtype->type);
         if (size == MSIZE_BAD) {

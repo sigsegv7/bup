@@ -14,9 +14,18 @@ struct point {
 }
 
 //
+// Structures may also contain structure instances
+// like so
+//
+struct foobar {
+    struct point xy;
+}
+
+//
 // Structs may be instantiated like so
 //
 struct point xy;
+struct foobar bar;
 
 //
 // Global variables can be declared and initialized to

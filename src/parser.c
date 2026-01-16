@@ -964,6 +964,7 @@ parse_ident(struct bup_state *state, struct token *tok, struct ast_node **res)
 static int
 parse_struct_fields(struct bup_state *state, struct token *tok, struct symbol *struc)
 {
+    struct symbol *symbol, *instance;
     struct datum_type dtype;
     int error;
 
@@ -976,24 +977,59 @@ parse_struct_fields(struct bup_state *state, struct token *tok, struct symbol *s
     }
 
     for (;;) {
-        if (parse_type(state, tok, &dtype) < 0) {
-            return -1;
-        }
+        switch (tok->type) {
+        case TT_STRUCT:
+            if (parse_expect(state, tok, TT_IDENT) < 0) {
+                return -1;
+            }
 
-        if (parse_expect(state, tok, TT_IDENT) < 0) {
-            return -1;
-        }
+            symbol = symbol_from_name(&state->symtab, tok->s);
+            if (symbol == NULL) {
+                trace_error(state, "undefined reference to struct %s\n", tok->s);
+                return -1;
+            }
 
-        error = symbol_field_new(
-            struc,
-            tok->s,
-            dtype.type,
-            NULL
-        );
+            if (symbol->type != SYMBOL_STRUCT) {
+                trace_error(state, "symbol %s is not a struct!\n", tok->s);
+                return -1;
+            }
 
-        if (error < 0) {
-            trace_error(state, "failed to allocate field symbol\n");
-            return -1;
+            if (parse_expect(state, tok, TT_IDENT) < 0) {
+                return -1;
+            }
+
+            error = symbol_field_new(
+                struc,
+                tok->s,
+                BUP_TYPE_VOID,
+                &instance
+            );
+
+            instance->type = SYMBOL_STRUCT;
+            instance->parent = symbol;
+            break;
+        default:
+            if (parse_type(state, tok, &dtype) < 0) {
+                return -1;
+            }
+
+            if (parse_expect(state, tok, TT_IDENT) < 0) {
+                return -1;
+            }
+
+            error = symbol_field_new(
+                struc,
+                tok->s,
+                dtype.type,
+                NULL
+            );
+
+            if (error < 0) {
+                trace_error(state, "failed to allocate field symbol\n");
+                return -1;
+            }
+
+            break;
         }
 
         if (parse_expect(state, tok, TT_SEMI) < 0) {
