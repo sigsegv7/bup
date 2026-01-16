@@ -24,6 +24,7 @@ typedef enum {
     SYMBOL_NONE,
     SYMBOL_VAR,
     SYMBOL_FUNC,
+    SYMBOL_STRUCT,
 } sym_type_t;
 
 /*
@@ -34,6 +35,9 @@ typedef enum {
  * @type: Symbol type
  * @data_type: Data type
  * @is_global: If set, symbol is global
+ * @field_count: Number of fields (if structure)
+ * @fields: Fields (if structure)
+ * @field link: Field queue link
  * @link: Queue link
  */
 struct symbol {
@@ -42,6 +46,9 @@ struct symbol {
     sym_type_t type;
     struct datum_type data_type;
     uint8_t is_global : 1;
+    size_t field_count;
+    TAILQ_HEAD(, symbol) fields;
+    TAILQ_ENTRY(symbol) field_link;
     TAILQ_ENTRY(symbol) link;
 };
 
@@ -86,6 +93,16 @@ struct symbol *symbol_from_id(struct symbol_table *symtab, sym_id_t id);
 struct symbol *symbol_from_name(struct symbol_table *symtab, const char *name);
 
 /*
+ * Obtain a sub-symbol using its name
+ *
+ * @symbol: Symbol parent to look up from
+ * @name:   Name to look up
+ *
+ * Returns NULL on failure
+ */
+struct symbol *symbol_field_from_name(struct symbol *symbol, const char *name);
+
+/*
  * Allocate a new symbol
  *
  * @symtab: Symbol table to add symbol to
@@ -97,6 +114,19 @@ struct symbol *symbol_from_name(struct symbol_table *symtab, const char *name);
  */
 int symbol_new(
     struct symbol_table *symtab, const char *name,
+    bup_type_t type, struct symbol **res
+);
+
+/*
+ * Allocate a new field symbol (sub-symbol)
+ *
+ * @symbol: Symbol to add to
+ * @name:   Name of sub-symbol
+ * @type:   Symbol data type
+ * @res:    Symbol result is written here
+ */
+int symbol_field_new(
+    struct symbol *symbol, const char *name,
     bup_type_t type, struct symbol **res
 );
 
