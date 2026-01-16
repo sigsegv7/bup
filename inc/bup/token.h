@@ -43,6 +43,7 @@ typedef enum {
     TT_BREAK,   /* 'break' */
     TT_CONT,    /* 'continue' */
     TT_IF,      /* 'if' */
+    TT_STRUCT,  /* 'struct' */
     TT_IDENT,   /* <IDENT> */
     TT_NUMBER,  /* <NUMBER> */
     TT_COMMENT, /* <COMMENT: ignored> */
