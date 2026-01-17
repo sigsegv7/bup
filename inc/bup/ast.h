@@ -26,6 +26,8 @@
  * @AST_ASSIGN: Assignment of variable
  * @AST_SYMBOL: Is a symbol
  * @AST_CALL:   Procedure call
+ * @AST_FIELD_ACCESS: Access of a field
+ * @AST_FIELD:  Field
  */
 typedef enum {
     AST_NONE,
@@ -43,6 +45,8 @@ typedef enum {
     AST_SYMBOL,
     AST_CALL,
     AST_STRUCT,
+    AST_FIELD_ACCESS,
+    AST_FIELD
 } ast_type_t;
 
 /*
@@ -52,6 +56,7 @@ typedef enum {
  * @type: Node type
  * @symbol: Program symbol associated with node
  * @left: Left node
+ * @mid:  Middle node
  * @right: Right node
  * @epilogue: Returns true if node is epilogue
  */
@@ -59,6 +64,7 @@ struct ast_node {
     ast_type_t type;
     struct symbol *symbol;
     struct ast_node *left;
+    struct ast_node *mid;
     struct ast_node *right;
     uint8_t epilogue : 1;
     union {

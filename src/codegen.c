@@ -10,6 +10,31 @@
 #include "bup/trace.h"
 #include "bup/mu.h"
 
+static void
+field_dump(struct ast_node *root)
+{
+    struct ast_node *cur;
+
+    if (root == NULL) {
+        return;
+    }
+
+    if (root->type != AST_FIELD_ACCESS) {
+        return;
+    }
+
+    printf("detected access to ");
+    cur = root->right;
+
+    while (cur != NULL) {
+        printf("%s", cur->s);
+        if ((cur = cur->right) != NULL)
+            printf(".");
+    }
+
+    printf("\n");
+}
+
 /*
  * Emit a procedure to assembly
  *
@@ -362,6 +387,7 @@ cg_emit_assign(struct bup_state *state, struct ast_node *root)
 {
     struct datum_type *dtype;
     struct ast_node *symbol_node, *value_node;
+    struct ast_node *field_node;
     struct symbol *symbol;
 
     if (state == NULL || root == NULL) {
@@ -389,6 +415,12 @@ cg_emit_assign(struct bup_state *state, struct ast_node *root)
     if ((symbol_node = root->left) == NULL) {
         trace_error(state, "assign has no lhs\n");
         errno = -EIO;
+        return -1;
+    }
+
+    if ((field_node = root->mid) != NULL) {
+        field_dump(field_node);
+        trace_error(state, "field accesses are currently unsupported\n");
         return -1;
     }
 

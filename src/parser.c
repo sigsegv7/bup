@@ -1097,6 +1097,84 @@ parse_assign(struct bup_state *state, struct token *tok, struct symbol *sym,
 }
 
 /*
+ * Parse a field access seperated by dots
+ *
+ * @state: Compiler state
+ * @tok:   Last token
+ * @sym:   Structure symbol
+ * @res:   AST node result
+ */
+static int
+parse_field_access(struct bup_state *state, struct token *tok, struct symbol *sym,
+    struct ast_node **res)
+{
+    struct ast_node *root, *cur;
+    struct ast_node *assign;
+
+    if (state == NULL || tok == NULL) {
+        return -1;
+    }
+
+    if (res == NULL) {
+        return -1;
+    }
+
+    if (tok->type != TT_DOT) {
+        return -1;
+    }
+
+    /* Allocate the root */
+    if (ast_alloc_node(state, AST_FIELD_ACCESS, &root) < 0) {
+        trace_error(state, "failed to allocate AST_FIELD_ACCESS\n");
+        return -1;
+    }
+
+    cur = root;
+    for (;;) {
+        if (parse_expect(state, tok, TT_IDENT) < 0) {
+            return -1;
+        }
+
+        if (ast_alloc_node(state, AST_FIELD, &cur->right) < 0) {
+            trace_error(state, "failed to allocate AST_FIELD\n");
+            return -1;
+        }
+
+        cur = cur->right;
+        cur->s = ptrbox_strdup(&state->ptrbox, tok->s);
+
+        if (parse_scan(state, tok) < 0) {
+            ueof(state);
+            return -1;
+        }
+
+        if (tok->type == TT_SEMI || tok->type == TT_EQUALS) {
+            break;
+        }
+
+        if (tok->type != TT_DOT) {
+            utok(state, "DOT", tokstr(tok));
+            return -1;
+        }
+    }
+
+    /* MAYBE : '=', otherwise put token back */
+    if (tok->type != TT_EQUALS) {
+        parse_putback(state, tok);
+        *res = root;
+        return 0;
+    }
+
+    if (parse_assign(state, tok, sym, &assign) < 0) {
+        return -1;
+    }
+
+    assign->mid = root;
+    *res = assign;
+    return 0;
+}
+
+/*
  * Parse an encountered identifier
  *
  * @state: Compiler state
@@ -1140,6 +1218,13 @@ parse_ident(struct bup_state *state, struct token *tok, struct ast_node **res)
     }
 
     switch (tok->type) {
+    case TT_DOT:
+        if (parse_field_access(state, tok, symbol, &root) < 0) {
+            return -1;
+        }
+
+        *res = root;
+        return 0;
     case TT_EQUALS:
         if (parse_assign(state, tok, symbol, &root) < 0) {
             return -1;
