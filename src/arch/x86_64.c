@@ -384,14 +384,22 @@ mu_cg_struct(struct bup_state *state, const char *name, struct symbol *symbol)
     return 0;
 }
 
-int
-mu_cg_array(struct bup_state *state, const char *label, size_t count)
+int mu_cg_array(struct bup_state *state, const char *label, bool is_global,
+    size_t count)
 {
     if (state == NULL || label == NULL) {
         return -1;
     }
 
     cg_assert_section(state, SECTION_DATA);
+    if (is_global) {
+        fprintf(
+            state->out_fp,
+            "[global %s]\n",
+            label
+        );
+    }
+
     fprintf(
         state->out_fp,
         "%s: times %zu db 0\n",

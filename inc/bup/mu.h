@@ -77,11 +77,15 @@ int mu_cg_globvar(
 /*
  * State: Compiler state
  * @label: Label of array
+ * @is_global: If true, array is global
  * @count: Number of bytes in array
  *
  * Returns zero on success
  */
-int mu_cg_array(struct bup_state *state, const char *label, size_t count);
+int mu_cg_array(
+    struct bup_state *state, const char *label,
+    bool is_global, size_t count
+);
 
 /*
  * Generate a 'ret'
