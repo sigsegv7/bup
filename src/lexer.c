@@ -406,6 +406,10 @@ lexer_scan(struct bup_state *state, struct token *res)
             return -1;
         }
         return 0;
+    case '.':
+        res->type = TT_DOT;
+        res->c = c;
+        return 0;
     case '+':
         res->type = TT_PLUS;
         res->c = c;

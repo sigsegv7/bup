@@ -16,6 +16,7 @@
 typedef enum {
     TT_NONE,    /* <TT_NONE>  */
     TT_ASM,     /* '@' */
+    TT_DOT,     /* '.' */
     TT_PLUS,    /* '+' */
     TT_MINUS,   /* '-' */
     TT_SLASH,   /* '/' */
