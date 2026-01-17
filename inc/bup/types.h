@@ -25,10 +25,12 @@ typedef enum {
  *
  * @type: Program data type
  * @ptr_depth: Pointer level depth
+ * @array_size:  Size of array, if zero, type is not array
  */
 struct datum_type {
     bup_type_t type;
     size_t ptr_depth;
+    size_t array_size;
 };
 
 static inline bup_type_t

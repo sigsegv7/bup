@@ -75,6 +75,15 @@ int mu_cg_globvar(
 );
 
 /*
+ * State: Compiler state
+ * @label: Label of array
+ * @count: Number of bytes in array
+ *
+ * Returns zero on success
+ */
+int mu_cg_array(struct bup_state *state, const char *label, size_t count);
+
+/*
  * Generate a 'ret'
  *
  * @state: Compiler state

@@ -183,8 +183,11 @@ cg_emit_var(struct bup_state *state, struct ast_node *root)
         return -1;
     }
 
-
     dtype = &symbol->data_type;
+    if (dtype->array_size > 0) {
+        return mu_cg_array(state, symbol->name, dtype->array_size);
+    }
+
     return mu_cg_globvar(
         state,
         symbol->name,

@@ -88,6 +88,16 @@ static const char *toktab[] = {
     [TT_COMMENT]    = "COMMENT"
 };
 
+/* Lookup table used to convert types to sizes */
+uint8_t typesztab[] = {
+    [BUP_TYPE_BAD] = 0,
+    [BUP_TYPE_VOID] = 0,
+    [BUP_TYPE_U8] = 1,
+    [BUP_TYPE_U16] = 2,
+    [BUP_TYPE_U32] = 4,
+    [BUP_TYPE_U64] = 8
+};
+
 /*
  * Parse a token in the parser-side putback buffer
  *
@@ -206,6 +216,50 @@ parse_expect(struct bup_state *state, struct token *tok, tt_t what)
 }
 
 /*
+ * Parse an array
+ *
+ * @state:  Compiler state
+ * @tok:    Token result
+ * @dtype:  Data type
+ */
+static int
+parse_array(struct bup_state *state, struct token *tok, struct datum_type *dtype)
+{
+    size_t sz;
+
+    if (state == NULL || tok == NULL) {
+        return -1;
+    }
+
+    if (dtype == NULL) {
+        return -1;
+    }
+
+    if (tok->type != TT_LBRACK) {
+        return -1;
+    }
+
+    /* EXPECT <NUMBER> */
+    if (parse_expect(state, tok, TT_NUMBER) < 0) {
+        return -1;
+    }
+
+    sz = tok->v * typesztab[dtype->type];
+    dtype->array_size = sz;
+
+    /* EXPECT ']' */
+    if (parse_expect(state, tok, TT_RBRACK) < 0) {
+        return -1;
+    }
+
+    if (parse_scan(state, tok) < 0) {
+        ueof(state);
+        return -1;
+    }
+    return 0;
+}
+
+/*
  * Parse a program datatype
  *
  * @state: Compiler state
@@ -228,6 +282,7 @@ parse_type(struct bup_state *state, struct token *tok, struct datum_type *res)
 
     type = token_to_type(tok->type);
     res->ptr_depth = 0;
+    res->array_size = 0;
 
     /*
      * If this is a bad token, verify that it is not
@@ -794,6 +849,11 @@ parse_var(struct bup_state *state, struct token *tok, struct ast_node **res)
     symbol->type = SYMBOL_VAR;
     symbol->is_global = is_global;
     root->symbol = symbol;
+
+    /* MAYBE: <ARRAY> */
+    if (parse_array(state, tok, &type) == 0) {
+        symbol->data_type = type;
+    }
 
     switch (tok->type) {
     case TT_EQUALS:

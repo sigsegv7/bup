@@ -48,6 +48,7 @@ struct symbol {
     struct datum_type data_type;
     uint8_t is_global : 1;
     size_t field_count;
+    size_t array_size;
     struct symbol *parent;
     TAILQ_HEAD(, symbol) fields;
     TAILQ_ENTRY(symbol) field_link;

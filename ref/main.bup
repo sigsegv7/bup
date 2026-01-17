@@ -57,6 +57,13 @@ u8 foo;
 u32 meow = 123_456;
 
 //
+// Arrays can be made with the array specifier [<n>] after
+// the identifier. This array is 8 bytes because it counts
+// as the type size times 8.
+//
+u8 pad[8];
+
+//
 // This function has internal linkage
 //
 proc do_nothing -> u32
