@@ -54,7 +54,7 @@ struct foobar bar;
 // up a series of digits to make them more readable.
 //
 u8 foo;
-u32 bar = 123_456;
+u32 meow = 123_456;
 
 //
 // This function has internal linkage
