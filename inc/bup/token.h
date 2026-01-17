@@ -31,6 +31,8 @@ typedef enum {
     TT_EQUALS,  /* '=' */
     TT_LPAREN,  /* '(' */
     TT_RPAREN,  /* ')' */
+    TT_LBRACK,  /* '[' */
+    TT_RBRACK,  /* ']' */
     TT_PROC,    /* 'proc' */
     TT_PUB,     /* 'pub' */
     TT_RETURN,  /* 'return' */

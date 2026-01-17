@@ -479,6 +479,14 @@ lexer_scan(struct bup_state *state, struct token *res)
         res->type = TT_RPAREN;
         res->c = c;
         return 0;
+    case '[':
+        res->type = TT_LBRACK;
+        res->c = c;
+        return 0;
+    case ']':
+        res->type = TT_RBRACK;
+        res->c = c;
+        return 0;
     default:
         if (lexer_scan_ident(state, c, res) == 0) {
             lexer_check_kw(state, res);
