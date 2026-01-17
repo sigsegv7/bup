@@ -1394,6 +1394,7 @@ parse_struct(struct bup_state *state, struct token *tok, struct ast_node **res)
             return -1;
         }
 
+        instance_symbol->type = SYMBOL_VAR;
         rhs->symbol = instance_symbol;
         lhs->symbol = struct_symbol;
 
