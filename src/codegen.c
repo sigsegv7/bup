@@ -5,15 +5,19 @@
 
 #include <stdio.h>
 #include <stddef.h>
+#include <string.h>
 #include <errno.h>
 #include "bup/codegen.h"
 #include "bup/trace.h"
 #include "bup/mu.h"
 
 static void
-field_dump(struct ast_node *root)
+cg_field_assign(struct bup_state *state, struct ast_node *symbol_node,
+    struct ast_node *root, struct ast_node *value_node)
 {
+    char buf[256];
     struct ast_node *cur;
+    struct symbol *symbol, *instance;
 
     if (root == NULL) {
         return;
@@ -23,16 +27,27 @@ field_dump(struct ast_node *root)
         return;
     }
 
-    printf("detected access to ");
-    cur = root->right;
-
-    while (cur != NULL) {
-        printf("%s", cur->s);
-        if ((cur = cur->right) != NULL)
-            printf(".");
+    if ((symbol = symbol_node->symbol) == NULL) {
+        return;
     }
 
-    printf("\n");
+    snprintf(buf, sizeof(buf), "%s.", symbol->name);
+    cur = root->right;
+    instance = symbol->parent;
+
+    while (cur != NULL) {
+        instance = cur->symbol;
+        strncat(buf, cur->s, sizeof(buf) - 1);
+        if ((cur = cur->right) != NULL)
+            strncat(buf, ".", sizeof(buf) - 1);
+    }
+
+    mu_cg_istorevar(
+        state,
+        datum_msize(&instance->data_type),
+        buf,
+        value_node->v
+    );
 }
 
 /*
@@ -419,9 +434,13 @@ cg_emit_assign(struct bup_state *state, struct ast_node *root)
     }
 
     if ((field_node = root->mid) != NULL) {
-        field_dump(field_node);
-        trace_error(state, "field accesses are currently unsupported\n");
-        return -1;
+        cg_field_assign(
+            state,
+            symbol_node,
+            field_node->mid,
+            field_node->right
+        );
+        return 0;
     }
 
     if ((symbol = symbol_node->symbol) == NULL) {

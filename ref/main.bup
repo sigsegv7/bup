@@ -89,6 +89,10 @@ pub proc main -> u32
     //
     foo = 2;
 
+    // Struct fields can be accessed like so
+    xy.x = 20;
+    xy.y = 50;
+
     if (1) {
         @ nop
     }

@@ -1108,6 +1108,7 @@ static int
 parse_field_access(struct bup_state *state, struct token *tok, struct symbol *sym,
     struct ast_node **res)
 {
+    struct symbol *cur_sym;
     struct ast_node *root, *cur;
     struct ast_node *assign;
 
@@ -1130,8 +1131,15 @@ parse_field_access(struct bup_state *state, struct token *tok, struct symbol *sy
     }
 
     cur = root;
+    cur_sym = sym->parent;
     for (;;) {
         if (parse_expect(state, tok, TT_IDENT) < 0) {
+            return -1;
+        }
+
+        cur_sym = symbol_field_from_name(cur_sym, tok->s);
+        if (cur_sym == NULL) {
+            trace_error(state, "undefined reference to field %s\n", tok->s);
             return -1;
         }
 
@@ -1142,6 +1150,7 @@ parse_field_access(struct bup_state *state, struct token *tok, struct symbol *sy
 
         cur = cur->right;
         cur->s = ptrbox_strdup(&state->ptrbox, tok->s);
+        cur->symbol = cur_sym;
 
         if (parse_scan(state, tok) < 0) {
             ueof(state);
@@ -1186,8 +1195,8 @@ parse_field_access(struct bup_state *state, struct token *tok, struct symbol *sy
 static int
 parse_ident(struct bup_state *state, struct token *tok, struct ast_node **res)
 {
-    struct ast_node *root;
-    struct ast_node *symbol_node;
+    struct ast_node *root, *field_node;
+    struct ast_node *symbol_node, *value_node;
     struct symbol *symbol;
 
     if (state == NULL || tok == NULL) {
@@ -1219,10 +1228,25 @@ parse_ident(struct bup_state *state, struct token *tok, struct ast_node **res)
 
     switch (tok->type) {
     case TT_DOT:
-        if (parse_field_access(state, tok, symbol, &root) < 0) {
+        if (parse_field_access(state, tok, symbol, &field_node) < 0) {
             return -1;
         }
 
+        value_node = field_node->right;
+        if (ast_alloc_node(state, AST_ASSIGN, &root) < 0) {
+            trace_error(state, "failed to allocate AST_ASSIGN\n");
+            return -1;
+        }
+
+        if (ast_alloc_node(state, AST_SYMBOL, &symbol_node) < 0) {
+            trace_error(state, "failed to allocate AST_SYMBOL\n");
+            return -1;
+        }
+
+        symbol_node->symbol = symbol;
+        root->left = symbol_node;
+        root->right = value_node;
+        root->mid = field_node;
         *res = root;
         return 0;
     case TT_EQUALS:
@@ -1480,6 +1504,8 @@ parse_struct(struct bup_state *state, struct token *tok, struct ast_node **res)
         }
 
         instance_symbol->type = SYMBOL_VAR;
+        instance_symbol->parent = struct_symbol;
+
         rhs->symbol = instance_symbol;
         lhs->symbol = struct_symbol;
 
