@@ -11,21 +11,10 @@
 #include "bup/token.h"
 #include "bup/ptrbox.h"
 #include "bup/symbol.h"
+#include "bup/section.h"
 
 #define DEFAULT_ASMOUT "bupgen.asm"
 #define SCOPE_STACK_MAX 8
-
-/*
- * Represents valid program sections
- */
-typedef enum {
-    SECTION_DISABLED,
-    SECTION_NONE,
-    SECTION_TEXT,
-    SECTION_DATA,
-    SECTION_BSS,
-    SECTION_MAX
-} bin_section_t;
 
 /*
  * Represents the compiler state
