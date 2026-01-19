@@ -73,6 +73,16 @@ proc do_nothing -> u32
 }
 
 //
+// Functions may have their destination section overriden by using
+// the section specifier operator ('$') like so
+//
+$ ".foo.text"
+pub proc foo_text -> void
+{
+    @ nop
+}
+
+//
 // Procedures are a collection of code that can be invoked one or more
 // times. They are denoted by the 'proc' keyword and identified with a
 // name that follows after. The type is given after the arrow operator
