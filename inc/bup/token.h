@@ -34,6 +34,7 @@ typedef enum {
     TT_RPAREN,  /* ')' */
     TT_LBRACK,  /* '[' */
     TT_RBRACK,  /* ']' */
+    TT_SECTION, /* '$' */
     TT_PROC,    /* 'proc' */
     TT_PUB,     /* 'pub' */
     TT_RETURN,  /* 'return' */

@@ -435,7 +435,6 @@ lexer_scan_str(struct bup_state *state, struct token *res)
         }
     }
 
-    res->type = TT_STRING;
     res->s = ptrbox_strdup(&state->ptrbox, buf);
     free(buf);
     return 0;
@@ -548,7 +547,20 @@ lexer_scan(struct bup_state *state, struct token *res)
         res->type = TT_RBRACK;
         res->c = c;
         return 0;
+    case '$':
+        res->type = TT_SECTION;
+        res->c = c;
+        if ((c = lexer_nom(state, true)) != '"') {
+            trace_error(state, "expected string after '$'\n");
+            return -1;
+        }
+
+        if (lexer_scan_str(state, res) < 0) {
+            return -1;
+        }
+        return 0;
     case '"':
+        res->type = TT_STRING;
         if (lexer_scan_str(state, res) < 0) {
             return -1;
         }
