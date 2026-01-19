@@ -86,7 +86,8 @@ static const char *toktab[] = {
     [TT_TYPE]       = "TYPE",
     [TT_IDENT]      = "IDENT",
     [TT_NUMBER]     = "NUMBER",
-    [TT_COMMENT]    = "COMMENT"
+    [TT_COMMENT]    = "COMMENT",
+    [TT_STRING]     = "STRING"
 };
 
 /* Lookup table used to convert types to sizes */

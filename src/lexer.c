@@ -384,6 +384,63 @@ lexer_scan_asm(struct bup_state *state, struct token *tok)
     return 0;
 }
 
+/*
+ * Scan for a single string
+ *
+ * @state: Compiler state
+ * @res:   Token result
+ *
+ * Returns zero on success
+ */
+static int
+lexer_scan_str(struct bup_state *state, struct token *res)
+{
+    char *buf;
+    size_t bufcap, bufsz;
+    char c;
+
+    if (state == NULL || res == NULL) {
+        errno = -EINVAL;
+        return -1;
+    }
+
+    bufcap = 8;
+    bufsz = 0;
+    if ((buf = malloc(bufcap)) == NULL) {
+        errno = -ENOMEM;
+        return -1;
+    }
+
+    for (;;) {
+        c = lexer_nom(state, false);
+        if (c == '\0') {
+            trace_error(state, "unexpected end of file, missing '\"'?\n");
+            return -1;
+        }
+
+        if (c == '"') {
+            buf[bufsz] = '\0';
+            break;
+        }
+
+        buf[bufsz++] = c;
+        if (bufsz >= bufcap - 1) {
+            bufcap += 8;
+            buf = realloc(buf, bufcap);
+        }
+
+        if (buf == NULL) {
+            errno = -ENOMEM;
+            return -1;
+        }
+    }
+
+    res->type = TT_STRING;
+    res->s = ptrbox_strdup(&state->ptrbox, buf);
+    free(buf);
+    return 0;
+}
+
 int
 lexer_scan(struct bup_state *state, struct token *res)
 {
@@ -490,6 +547,11 @@ lexer_scan(struct bup_state *state, struct token *res)
     case ']':
         res->type = TT_RBRACK;
         res->c = c;
+        return 0;
+    case '"':
+        if (lexer_scan_str(state, res) < 0) {
+            return -1;
+        }
         return 0;
     default:
         if (lexer_scan_ident(state, c, res) == 0) {

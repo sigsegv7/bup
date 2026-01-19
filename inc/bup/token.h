@@ -52,6 +52,7 @@ typedef enum {
     TT_IDENT,   /* <IDENT> */
     TT_NUMBER,  /* <NUMBER> */
     TT_COMMENT, /* <COMMENT: ignored> */
+    TT_STRING,  /* <STRING> */
 } tt_t;
 
 /*
