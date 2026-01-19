@@ -34,6 +34,7 @@
  * @this_proc:   Symbol of current procedure
  * @cur_section: Current program section
  * @parse_putback: Parser putback buffer
+ * @cur_section: Symbol section, auto-placed if SECTION_DISABLED
  */
 struct bup_state {
     int in_fd;

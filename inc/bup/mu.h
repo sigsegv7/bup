@@ -53,11 +53,15 @@ type_to_msize(bup_type_t type)
  *
  * @state:      Compiler state
  * @name:       Name of label to create
+ * @section:    Section to put label in
  * @is_global:  If true, label shall be global
  *
  * Returns zero on success
  */
-int mu_cg_label(struct bup_state *state, const char *name, bool is_global);
+int mu_cg_label(
+    struct bup_state *state, const char *name,
+    const char *section, bool is_global
+);
 
 /*
  * Create a global variable of a specific type
@@ -155,11 +159,15 @@ int mu_cg_call(struct bup_state *state, const char *label);
  *
  * @state: Compiler state
  * @name: Instance name
+ * @instance: Instance symbol
  * @symbol: Structure symbol
  *
  * Returns zero on success
  */
-int mu_cg_struct(struct bup_state *state, const char *name, struct symbol *symbol);
+int mu_cg_struct(
+    struct bup_state *state, const char *name,
+    struct symbol *instance, struct symbol *symbol
+);
 
 /*
  * Load an imm into a variable

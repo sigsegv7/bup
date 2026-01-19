@@ -10,6 +10,7 @@
 #include <stdint.h>
 #include <stddef.h>
 #include "bup/types.h"
+#include "bup/section.h"
 
 /* Forward declaration */
 struct ast_node;
@@ -37,6 +38,7 @@ typedef enum {
  * @data_type: Data type
  * @is_global: If set, symbol is global
  * @field_count: Number of fields (if structure)
+ * @section: Section override for symbol (unused if NULL)
  * @fields: Fields (if structure)
  * @field link: Field queue link
  * @link: Queue link
@@ -50,6 +52,7 @@ struct symbol {
     size_t field_count;
     size_t array_size;
     struct symbol *parent;
+    char *section;
     TAILQ_HEAD(, symbol) fields;
     TAILQ_ENTRY(symbol) field_link;
     TAILQ_ENTRY(symbol) link;

@@ -585,6 +585,7 @@ parse_proc(struct bup_state *state, struct token *tok, struct ast_node **res)
     struct symbol *symbol;
     struct ast_node *root, *args;
     struct datum_type type;
+    char *section = NULL;
     int error;
     bool is_global = false;
 
@@ -612,6 +613,19 @@ parse_proc(struct bup_state *state, struct token *tok, struct ast_node **res)
     if (parse_backstep(state, 1, tok) == 0) {
         if (tok->type == TT_PUB)
             is_global = true;
+    }
+
+    /*
+     * If there is a pub keyword in place, there might be a section
+     * specifier before it. Otherwise check if there is a section
+     * specifier before the 'proc' keyword.
+     */
+    if (is_global && parse_backstep(state, 2, tok) == 0) {
+        if (tok->type == TT_SECTION)
+            section = tok->s;
+    } else if (!is_global && parse_backstep(state, 1, tok) == 0) {
+        if (tok->type == TT_SECTION)
+            section = tok->s;
     }
 
     /* EXPECT <IDENT> */
@@ -667,6 +681,7 @@ parse_proc(struct bup_state *state, struct token *tok, struct ast_node **res)
     symbol->type = SYMBOL_FUNC;
     symbol->is_global = is_global;
     symbol->data_type = type;
+    symbol->section = section;
 
     /* EXPECT <SEMICOLON> OR <LBRACE> */
     switch (tok->type) {
@@ -1405,6 +1420,7 @@ parse_struct(struct bup_state *state, struct token *tok, struct ast_node **res)
     struct ast_node *root, *lhs, *rhs;
     struct symbol *struct_symbol;
     struct symbol *instance_symbol;
+    char *section = NULL;
     int error;
 
     if (state == NULL || tok == NULL) {
@@ -1418,6 +1434,12 @@ parse_struct(struct bup_state *state, struct token *tok, struct ast_node **res)
     /* EXPECT 'struct' */
     if (tok->type != TT_STRUCT) {
         return -1;
+    }
+
+    /* Is this placed in a section? */
+    if (parse_backstep(state, 2, tok) == 0) {
+        if (tok->type == TT_SECTION)
+            section = tok->s;
     }
 
     /* EXPECT <IDENT> */
@@ -1507,6 +1529,7 @@ parse_struct(struct bup_state *state, struct token *tok, struct ast_node **res)
 
         instance_symbol->type = SYMBOL_VAR;
         instance_symbol->parent = struct_symbol;
+        instance_symbol->section = section;
 
         rhs->symbol = instance_symbol;
         lhs->symbol = struct_symbol;
@@ -1695,6 +1718,8 @@ parse_program(struct bup_state *state, struct token *tok)
             return -1;
         }
 
+        break;
+    case TT_SECTION:
         break;
     case TT_PUB:
         /* Modifier */

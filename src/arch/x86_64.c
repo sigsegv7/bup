@@ -135,14 +135,23 @@ cg_alloc_gpreg(void)
 }
 
 int
-mu_cg_label(struct bup_state *state, const char *name, bool is_global)
+mu_cg_label(struct bup_state *state, const char *name, const char *section,
+    bool is_global)
 {
     if (state == NULL || name == NULL) {
         errno = -EINVAL;
         return -1;
     }
 
-    cg_assert_section(state, SECTION_TEXT);
+    /* .text is the default */
+    if (section != NULL) {
+        fprintf(
+            state->out_fp,
+            "[section %s]\n",
+            section
+        );
+    }
+
     if (is_global) {
         fprintf(
             state->out_fp,
@@ -338,7 +347,8 @@ mu_cg_icmpnz(struct bup_state *state, const char *label, ssize_t imm)
 }
 
 int
-mu_cg_struct(struct bup_state *state, const char *name, struct symbol *symbol)
+mu_cg_struct(struct bup_state *state, const char *name, struct symbol *instance,
+    struct symbol *symbol)
 {
     char name_buf[64];
     struct symbol *field;
@@ -350,7 +360,15 @@ mu_cg_struct(struct bup_state *state, const char *name, struct symbol *symbol)
         return -1;
     }
 
-    cg_assert_section(state, SECTION_DATA);
+    if (instance->section == NULL) {
+        cg_assert_section(state, SECTION_DATA);
+    } else {
+        fprintf(
+            state->out_fp,
+            "[section %s]\n",
+            instance->section
+        );
+    }
     fprintf(state->out_fp, "%s:\n", name);
     FIELD_FOREACH(symbol, field) {
         /* Handle struct instances */
@@ -362,7 +380,7 @@ mu_cg_struct(struct bup_state *state, const char *name, struct symbol *symbol)
                 name,
                 field->name
             );
-            mu_cg_struct(state, name_buf, field->parent);
+            mu_cg_struct(state, name_buf, instance, field->parent);
             continue;
         }
 

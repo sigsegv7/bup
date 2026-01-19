@@ -61,6 +61,7 @@ cg_field_assign(struct bup_state *state, struct ast_node *symbol_node,
 static int
 cg_emit_proc(struct bup_state *state, struct ast_node *root)
 {
+    const char *section;
     struct symbol *symbol;
     int retval = 0;
 
@@ -78,7 +79,16 @@ cg_emit_proc(struct bup_state *state, struct ast_node *root)
         retval = mu_cg_ret(state);
     } else {
         trace_debug("detected procedure %s\n", symbol->name);
-        retval = mu_cg_label(state, symbol->name, symbol->is_global);
+        section = (symbol->section) == NULL
+            ? ".text"
+            : symbol->section;
+
+        retval = mu_cg_label(
+            state,
+            symbol->name,
+            section,
+            symbol->is_global
+        );
     }
 
     return retval;
@@ -196,7 +206,7 @@ cg_emit_loop(struct bup_state *state, struct ast_node *root)
         );
     }
 
-    return mu_cg_label(state, label_buf, false);
+    return mu_cg_label(state, label_buf, NULL, false);
 }
 
 /*
@@ -376,7 +386,7 @@ cg_emit_if(struct bup_state *state, struct ast_node *root)
             "IF.%zu",
             state->if_count - 1
         );
-        mu_cg_label(state, label_buf, false);
+        mu_cg_label(state, label_buf, NULL, false);
         return 0;
     }
 
@@ -554,7 +564,7 @@ cg_emit_struct(struct bup_state *state, struct ast_node *root)
         return -1;
     }
 
-    return mu_cg_struct(state, instance->name, symbol);
+    return mu_cg_struct(state, instance->name, instance, symbol);
 }
 
 int
